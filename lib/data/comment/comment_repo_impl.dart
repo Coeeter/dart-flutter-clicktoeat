@@ -1,7 +1,13 @@
+import 'package:clicktoeat/data/comment/remote/remote_comment_dao.dart';
 import 'package:clicktoeat/domain/comment/comment.dart';
 import 'package:clicktoeat/domain/comment/comment_repo.dart';
 
 class CommentRepoImpl implements CommentRepo {
+  final RemoteCommentDao _dao;
+
+  CommentRepoImpl({required RemoteCommentDao remoteCommentDao})
+      : _dao = remoteCommentDao;
+
   @override
   Future<String> createComment({
     required String token,
@@ -9,7 +15,12 @@ class CommentRepoImpl implements CommentRepo {
     required String review,
     required int rating,
   }) {
-    throw UnimplementedError();
+    return _dao.createComment(
+      token: token,
+      restaurantId: restaurantId,
+      review: review,
+      rating: rating,
+    );
   }
 
   @override
@@ -17,29 +28,32 @@ class CommentRepoImpl implements CommentRepo {
     required String token,
     required String commentId,
   }) {
-    throw UnimplementedError();
+    return _dao.deleteComment(
+      token: token,
+      commentId: commentId,
+    );
   }
 
   @override
   Future<List<Comment>> getAllComments() {
-    throw UnimplementedError();
+    return _dao.getAllComments();
   }
 
   @override
   Future<Comment> getCommentById({required String id}) {
-    throw UnimplementedError();
+    return _dao.getCommentById(id: id);
   }
 
   @override
   Future<List<Comment>> getCommentsByRestaurant({
     required String restaurantId,
   }) {
-    throw UnimplementedError();
+    return _dao.getCommentsByRestaurant(restaurantId: restaurantId);
   }
 
   @override
   Future<List<Comment>> getCommentsByUser({required String userId}) {
-    throw UnimplementedError();
+    return _dao.getCommentsByUser(userId: userId);
   }
 
   @override
@@ -49,6 +63,11 @@ class CommentRepoImpl implements CommentRepo {
     String? review,
     int? rating,
   }) {
-    throw UnimplementedError();
+    return _dao.updateComment(
+      token: token,
+      commentId: commentId,
+      review: review,
+      rating: rating
+    );
   }
 }
