@@ -1,6 +1,6 @@
 import 'package:clicktoeat/domain/comment/comment.dart';
 
-abstract class CommentRepo {
+abstract class RemoteCommentDao {
   Future<List<Comment>> getAllComments();
   Future<Comment> getCommentById({required String id});
   Future<List<Comment>> getCommentsByUser({required String userId});
