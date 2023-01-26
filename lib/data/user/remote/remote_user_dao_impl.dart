@@ -17,7 +17,7 @@ class RemoteUserDaoImpl extends NetworkUtils implements RemoteUserDao {
     required String token,
     required String password,
   }) async {
-    var response = await post(
+    var response = await delete(
       createUrl(),
       headers: createAuthorizationHeader(token),
       body: {
@@ -78,7 +78,7 @@ class RemoteUserDaoImpl extends NetworkUtils implements RemoteUserDao {
       },
     );
     if (response.statusCode == 400) {
-      throw FieldError.fromJson(jsonDecode(response.body));
+      throw FieldException.fromJson(jsonDecode(response.body));
     }
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
@@ -113,7 +113,7 @@ class RemoteUserDaoImpl extends NetworkUtils implements RemoteUserDao {
     }
     var response = await Response.fromStream(await request.send());
     if (response.statusCode == 400) {
-      throw FieldError.fromJson(jsonDecode(response.body));
+      throw FieldException.fromJson(jsonDecode(response.body));
     }
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
@@ -133,7 +133,7 @@ class RemoteUserDaoImpl extends NetworkUtils implements RemoteUserDao {
       body: {"email": email},
     );
     if (response.statusCode == 400) {
-      throw FieldError.fromJson(jsonDecode(response.body));
+      throw FieldException.fromJson(jsonDecode(response.body));
     }
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
@@ -155,7 +155,8 @@ class RemoteUserDaoImpl extends NetworkUtils implements RemoteUserDao {
     File? image,
     bool? deleteImage,
   }) async {
-    var request = MultipartRequest("PUT", createUrl());
+    var request = MultipartRequest("PUT", createUrl())
+      ..headers["authorization"] = "Bearer $token";
     int length = 0;
     if (username != null) {
       request.fields["username"] = username;
@@ -185,10 +186,10 @@ class RemoteUserDaoImpl extends NetworkUtils implements RemoteUserDao {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
     Map<String, String> body = jsonDecode(response.body);
-    var token = body["token"];
-    if (token == null) {
+    var updatedToken = body["token"];
+    if (updatedToken == null) {
       throw DefaultException(error: "Unknown error has occurred");
     }
-    return token;
+    return updatedToken;
   }
 }

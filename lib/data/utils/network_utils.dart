@@ -10,7 +10,7 @@ class NetworkUtils {
 
   Map<String, String> createAuthorizationHeader(String token) {
     return {
-      "token": "Bearer $token",
+      "authorization": "Bearer $token",
     };
   }
 }
