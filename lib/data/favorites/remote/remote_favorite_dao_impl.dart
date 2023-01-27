@@ -32,7 +32,7 @@ class RemoteFavoriteDaoImpl extends NetworkUtils implements RemoteFavoriteDao {
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
-    List<Map<String, dynamic>> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body) as List;
     return body.map((e) => User.fromJson(e)).toList();
   }
 
@@ -42,7 +42,7 @@ class RemoteFavoriteDaoImpl extends NetworkUtils implements RemoteFavoriteDao {
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
-    List<Map<String, dynamic>> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body) as List;
     return body.map((e) => Restaurant.fromJson(e)).toList();
   }
 

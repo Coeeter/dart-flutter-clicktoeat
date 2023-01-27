@@ -31,7 +31,7 @@ class RemoteRestaurantDaoImpl extends NetworkUtils
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
-    Map<String, dynamic> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body) as Map;
     return body["insertId"];
   }
 
@@ -56,7 +56,7 @@ class RemoteRestaurantDaoImpl extends NetworkUtils
         error: "Unable to get restaurants. Try again later",
       );
     }
-    List<Map<String, dynamic>> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body) as List;
     return body.map((e) => Restaurant.fromJson(e)).toList();
   }
 
@@ -66,7 +66,7 @@ class RemoteRestaurantDaoImpl extends NetworkUtils
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
-    Map<String, dynamic> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body);
     return Restaurant.fromJson(body);
   }
 
@@ -104,7 +104,7 @@ class RemoteRestaurantDaoImpl extends NetworkUtils
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
-    Map<String, dynamic> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body);
     return Restaurant.fromJson(body);
   }
 }

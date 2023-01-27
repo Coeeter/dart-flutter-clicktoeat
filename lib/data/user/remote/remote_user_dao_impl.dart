@@ -25,7 +25,7 @@ class RemoteUserDaoImpl extends NetworkUtils implements RemoteUserDao {
       },
     );
     if (response.statusCode == 200) return;
-    Map<String, dynamic> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body);
     if (response.statusCode == 400) {
       throw FieldException.fromJson(body);
     }
@@ -38,7 +38,7 @@ class RemoteUserDaoImpl extends NetworkUtils implements RemoteUserDao {
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
-    List<Map<String, dynamic>> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body) as List;
     return body.map((e) => User.fromJson(e)).toList();
   }
 
@@ -83,7 +83,7 @@ class RemoteUserDaoImpl extends NetworkUtils implements RemoteUserDao {
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
-    Map<String, String> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body) as Map;
     var token = body["token"];
     if (token == null) {
       throw DefaultException(error: "Unknown error has occurred");
@@ -118,7 +118,7 @@ class RemoteUserDaoImpl extends NetworkUtils implements RemoteUserDao {
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
-    Map<String, String> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body) as Map;
     var token = body["token"];
     if (token == null) {
       throw DefaultException(error: "Unknown error has occurred");
@@ -138,7 +138,7 @@ class RemoteUserDaoImpl extends NetworkUtils implements RemoteUserDao {
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
-    Map<String, String> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body) as Map;
     var message = body["message"];
     if (message == null) {
       throw DefaultException(error: "Unknown error has occurred");
@@ -185,7 +185,7 @@ class RemoteUserDaoImpl extends NetworkUtils implements RemoteUserDao {
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
-    Map<String, String> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body) as Map;
     var updatedToken = body["token"];
     if (updatedToken == null) {
       throw DefaultException(error: "Unknown error has occurred");

@@ -33,7 +33,7 @@ class RemoteBranchDaoImpl extends NetworkUtils implements RemoteBranchDao {
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
-    Map<String, dynamic> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body) as Map;
     return body["insertId"];
   }
 
@@ -63,7 +63,7 @@ class RemoteBranchDaoImpl extends NetworkUtils implements RemoteBranchDao {
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
-    List<Map<String, dynamic>> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body) as List;
     return body.map((e) => Branch.fromJson(e)).toList();
   }
 }

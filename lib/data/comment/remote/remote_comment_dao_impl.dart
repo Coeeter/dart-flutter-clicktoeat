@@ -45,7 +45,7 @@ class RemoteCommentDaoImpl extends NetworkUtils implements RemoteCommentDao {
       headers: createAuthorizationHeader(token),
     );
     if (response.statusCode == 200) return;
-    Map<String, dynamic> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body);
     throw DefaultException.fromJson(body);
   }
 
@@ -55,7 +55,7 @@ class RemoteCommentDaoImpl extends NetworkUtils implements RemoteCommentDao {
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
-    List<Map<String, dynamic>> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body) as List;
     return body.map((e) => Comment.fromJson(e)).toList();
   }
 
@@ -65,7 +65,7 @@ class RemoteCommentDaoImpl extends NetworkUtils implements RemoteCommentDao {
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
-    Map<String, dynamic> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body);
     return Comment.fromJson(body);
   }
 
@@ -77,7 +77,7 @@ class RemoteCommentDaoImpl extends NetworkUtils implements RemoteCommentDao {
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
-    List<Map<String, dynamic>> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body) as List;
     return body.map((e) => Comment.fromJson(e)).toList();
   }
 
@@ -87,7 +87,7 @@ class RemoteCommentDaoImpl extends NetworkUtils implements RemoteCommentDao {
     if (response.statusCode != 200) {
       throw DefaultException.fromJson(jsonDecode(response.body));
     }
-    List<Map<String, dynamic>> body = jsonDecode(response.body);
+    var body = jsonDecode(response.body) as List;
     return body.map((e) => Comment.fromJson(e)).toList();
   }
 
