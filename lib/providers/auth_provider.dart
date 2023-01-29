@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:clicktoeat/data/exceptions/default_exception.dart';
+import 'package:clicktoeat/data/exceptions/unauthenticated_exception.dart';
 import 'package:clicktoeat/domain/user/user.dart';
 import 'package:clicktoeat/domain/user/user_repo.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +16,7 @@ class AuthProvider extends ChangeNotifier {
     (() async {
       try {
         await getToken();
-      } on DefaultException {
+      } on UnauthenticatedException {
         return;
       }
       await getCurrentUser();

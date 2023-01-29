@@ -1,3 +1,4 @@
+import 'package:clicktoeat/data/exceptions/unauthenticated_exception.dart';
 import 'package:clicktoeat/data/user/local/local_user_dao.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,7 +12,7 @@ class LocalUserDaoImpl implements LocalUserDao {
   @override
   Future<String> getToken() async {
     var token = _preferences.getString(_key);
-    if (token == null) throw Exception("Not logged in.");
+    if (token == null) throw UnauthenticatedException();
     return token;
   }
 

@@ -48,7 +48,7 @@ class RestaurantProvider extends ChangeNotifier {
       restaurantList = restaurantList
         ..add(restaurant)
         ..sort((a, b) {
-          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+          return a.name.compareTo(b.name);
         });
       notifyListeners();
     } on DefaultException catch (e) {
