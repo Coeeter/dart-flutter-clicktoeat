@@ -1,4 +1,4 @@
-import 'package:clicktoeat/ui/components/buttons/gradient_button.dart';
+import 'package:clicktoeat/ui/components/buttons/clt_gradient_button.dart';
 import 'package:clicktoeat/ui/components/typography/clt_heading.dart';
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +25,7 @@ class _AuthScreenState extends State<AuthScreen>
         vsync: this,
         duration: const Duration(milliseconds: 750),
       );
-      Future.delayed(const Duration(milliseconds: 200)).then((value) {
+      Future.delayed(const Duration(milliseconds: 150)).then((value) {
         animation = Tween<double>(
           begin: 3.5,
           end: 1,
@@ -143,7 +143,7 @@ class _AuthScreenState extends State<AuthScreen>
                             const SizedBox(height: 30),
                             SizedBox(
                               width: double.infinity,
-                              child: GradientButton(
+                              child: CltGradientButton(
                                 onClick: () {},
                                 text: "Login",
                               ),

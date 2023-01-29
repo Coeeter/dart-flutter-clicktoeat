@@ -1,11 +1,11 @@
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/material.dart';
 
-class GradientButton extends StatelessWidget {
+class CltGradientButton extends StatelessWidget {
   final void Function() onClick;
   final String text;
 
-  const GradientButton({
+  const CltGradientButton({
     Key? key,
     required this.onClick,
     required this.text,
