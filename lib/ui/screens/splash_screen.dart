@@ -15,18 +15,20 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   double top = 0;
-  double width = 30;
-  double height = 30;
+  double width = 20;
+  double height = 20;
   double borderRadius = 50;
   double opacity = 0;
-  Duration duration = const Duration(milliseconds: 350);
+  Curve curve = Curves.bounceOut;
+  Duration duration = const Duration(milliseconds: 1000);
 
   void animateItems(BuildContext context) async {
     setState(() {
       top = MediaQuery.of(context).size.height / 2;
     });
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 1200));
     setState(() {
+      curve = Curves.fastOutSlowIn;
       duration = const Duration(milliseconds: 750);
       width = MediaQuery.of(context).size.width;
       height = MediaQuery.of(context).size.height;
@@ -74,7 +76,7 @@ class _SplashScreenState extends State<SplashScreen> {
             top: top - height / 2,
             right: MediaQuery.of(context).size.width / 2 - width / 2,
             duration: duration,
-            curve: Curves.fastOutSlowIn,
+            curve: curve,
             child: Hero(
               tag: "logo",
               child: AnimatedContainer(
