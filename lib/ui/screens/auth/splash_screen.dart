@@ -1,7 +1,7 @@
 import 'package:clicktoeat/data/exceptions/unauthenticated_exception.dart';
 import 'package:clicktoeat/providers/auth_provider.dart';
-import 'package:clicktoeat/ui/screens/auth_screen.dart';
-import 'package:clicktoeat/ui/screens/home_screen.dart';
+import 'package:clicktoeat/ui/screens/auth/auth_screen.dart';
+import 'package:clicktoeat/ui/screens/restaurant/home_screen.dart';
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';

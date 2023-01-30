@@ -1,4 +1,4 @@
-import 'package:clicktoeat/ui/screens/splash_screen.dart';
+import 'package:clicktoeat/ui/screens/auth/splash_screen.dart';
 import 'package:clicktoeat/ui/theme/theme.dart';
 import 'package:flutter/material.dart';
 

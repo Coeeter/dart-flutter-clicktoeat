@@ -6,7 +6,7 @@ import 'package:clicktoeat/providers/comment_provider.dart';
 import 'package:clicktoeat/providers/restaurant_provider.dart';
 import 'package:clicktoeat/ui/components/clt_restaurant_card.dart';
 import 'package:clicktoeat/ui/components/typography/clt_heading.dart';
-import 'package:clicktoeat/ui/screens/auth_screen.dart';
+import 'package:clicktoeat/ui/screens/auth/auth_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
