@@ -13,6 +13,15 @@ var darkTheme = ThemeData.dark().copyWith(
   colorScheme: const ColorScheme.dark().copyWith(
     primary: lightOrange,
   ),
+  inputDecorationTheme: InputDecorationTheme(
+    errorBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.red[300]!),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.red[300]!),
+    ),
+    errorStyle: TextStyle(color: Colors.red[300]!),
+  ),
   appBarTheme: const AppBarTheme(
     backgroundColor: Color(0xFF272727),
     elevation: 4,

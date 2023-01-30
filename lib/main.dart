@@ -9,7 +9,9 @@ import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:clicktoeat/providers/comment_provider.dart';
 import 'package:clicktoeat/providers/restaurant_provider.dart';
 import 'package:clicktoeat/ui/clt_app.dart';
+import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,6 +32,12 @@ void main() async {
 
   var commentRepo = CommentRepoImpl(
     remoteCommentDao: RemoteCommentDaoImpl(),
+  );
+
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: lightOrange,
+    ),
   );
 
   runApp(

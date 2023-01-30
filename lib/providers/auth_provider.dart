@@ -1,6 +1,3 @@
-import 'dart:developer';
-
-import 'package:clicktoeat/data/exceptions/default_exception.dart';
 import 'package:clicktoeat/data/exceptions/unauthenticated_exception.dart';
 import 'package:clicktoeat/domain/user/user.dart';
 import 'package:clicktoeat/domain/user/user_repo.dart';
@@ -41,9 +38,31 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void logOut() {
+  Future<void> login(String email, String password) async {
+    var resultToken = await _userRepo.login(
+      email: email,
+      password: password,
+    );
+    await _userRepo.saveToken(token: resultToken);
+    token = resultToken;
+    await getCurrentUser();
+  }
+
+  Future<void> register(String username, String email, String password) async {
+    var resultToken = await _userRepo.register(
+      username: username,
+      email: email,
+      password: password,
+    );
+    await _userRepo.saveToken(token: resultToken);
+    token = resultToken;
+    await getCurrentUser();
+  }
+
+  Future<void> logOut() async {
     token = null;
     user = null;
+    await _userRepo.removeToken();
     notifyListeners();
   }
 }

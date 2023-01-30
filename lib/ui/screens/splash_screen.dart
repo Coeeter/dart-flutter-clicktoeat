@@ -1,3 +1,4 @@
+import 'package:clicktoeat/data/exceptions/unauthenticated_exception.dart';
 import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:clicktoeat/ui/screens/auth_screen.dart';
 import 'package:clicktoeat/ui/screens/home_screen.dart';
@@ -41,11 +42,13 @@ class _SplashScreenState extends State<SplashScreen> {
     });
     await Future.delayed(const Duration(milliseconds: 2000));
     var authProvider = Provider.of<AuthProvider>(context, listen: false);
-    if (authProvider.token == null) {
+    try {
+      await authProvider.getToken();
+    } on UnauthenticatedException {
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
-          transitionDuration: const Duration(seconds: 1),
+          transitionDuration: const Duration(milliseconds: 1500),
           pageBuilder: (_, __, ___) => const AuthScreen(),
         ),
       );

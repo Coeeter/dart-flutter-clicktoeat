@@ -1,10 +1,12 @@
 import 'dart:math';
 
 import 'package:clicktoeat/domain/restaurant/restaurant.dart';
+import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:clicktoeat/providers/comment_provider.dart';
 import 'package:clicktoeat/providers/restaurant_provider.dart';
 import 'package:clicktoeat/ui/components/clt_restaurant_card.dart';
 import 'package:clicktoeat/ui/components/typography/clt_heading.dart';
+import 'package:clicktoeat/ui/screens/auth_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -50,7 +52,24 @@ class HomeScreen extends StatelessWidget {
       });
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Hello world")),
+      appBar: AppBar(
+        title: const Text("Hello world"),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              var provider = Provider.of<AuthProvider>(context, listen: false);
+              await provider.logOut();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AuthScreen(animate: false),
+                ),
+              );
+            },
+            icon: const Icon(Icons.logout),
+          ),
+        ],
+      ),
       body: restaurantProvider.isLoading
           ? Container(
               alignment: Alignment.center,
