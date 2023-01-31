@@ -5,11 +5,15 @@ class CltGradientButton extends StatelessWidget {
   final void Function() onClick;
   final String text;
   final bool isLoading;
+  final Gradient gradient;
 
   const CltGradientButton({
     Key? key,
     required this.onClick,
     required this.text,
+    this.gradient = const LinearGradient(
+      colors: [lightOrange, mediumOrange],
+    ),
     this.isLoading = false,
   }) : super(key: key);
 
@@ -23,11 +27,7 @@ class CltGradientButton extends StatelessWidget {
       splashFactory: InkRipple.splashFactory,
       child: Ink(
         decoration: BoxDecoration(
-          gradient: isLoading
-              ? null
-              : const LinearGradient(
-                  colors: [lightOrange, mediumOrange],
-                ),
+          gradient: isLoading ? null : gradient,
           color: isLoading ? Colors.grey[300] : null,
           borderRadius: const BorderRadius.all(
             Radius.circular(10),

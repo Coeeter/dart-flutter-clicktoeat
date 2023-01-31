@@ -1,4 +1,5 @@
 import 'package:clicktoeat/ui/screens/auth/login_form.dart';
+import 'package:clicktoeat/ui/screens/auth/signup_form.dart';
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -15,6 +16,20 @@ class _AuthScreenState extends State<AuthScreen>
     with SingleTickerProviderStateMixin {
   AnimationController? _controller;
   Animation<double>? _animation;
+
+  Offset _loginOffset = const Offset(0, 0);
+  Offset _signUpOffset = const Offset(1.1, 0);
+
+  void animatePage(AuthPage currentPage) {
+    setState(() {
+      _loginOffset = currentPage == AuthPage.login
+          ? const Offset(0, 0)
+          : const Offset(-1.1, 0);
+      _signUpOffset = currentPage == AuthPage.login
+          ? const Offset(1.1, 0)
+          : const Offset(0, 0);
+    });
+  }
 
   @override
   void initState() {
@@ -103,7 +118,30 @@ class _AuthScreenState extends State<AuthScreen>
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   height: 425,
-                  child: LoginForm(goToSignUpForm: () {}),
+                  child: Stack(
+                    children: [
+                      AnimatedSlide(
+                        offset: _loginOffset,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.fastOutSlowIn,
+                        child: LoginForm(
+                          goToSignUpForm: () {
+                            animatePage(AuthPage.signUp);
+                          },
+                        ),
+                      ),
+                      AnimatedSlide(
+                        offset: _signUpOffset,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.fastOutSlowIn,
+                        child: SignUpForm(
+                          goToLoginPage: () {
+                            animatePage(AuthPage.login);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               )
             ],
@@ -112,4 +150,9 @@ class _AuthScreenState extends State<AuthScreen>
       ),
     );
   }
+}
+
+enum AuthPage {
+  login,
+  signUp,
 }

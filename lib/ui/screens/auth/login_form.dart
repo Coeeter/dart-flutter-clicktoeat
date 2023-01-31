@@ -116,7 +116,7 @@ class _LoginFormState extends State<LoginForm> {
                   _email = value!;
                 },
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 15),
               TextFormField(
                 decoration: InputDecoration(
                   label: const Text("Password"),
@@ -150,7 +150,14 @@ class _LoginFormState extends State<LoginForm> {
                   _password = value!;
                 },
               ),
-              const SizedBox(height: 30),
+              Container(
+                width: double.infinity,
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {}, //TODO: navigate to forget password screen
+                  child: const Text("Forgot password?"),
+                ),
+              ),
               SizedBox(
                 width: double.infinity,
                 child: CltGradientButton(
@@ -159,6 +166,15 @@ class _LoginFormState extends State<LoginForm> {
                   text: "Login",
                 ),
               ),
+              const SizedBox(height: 5),
+              Container(
+                width: double.infinity,
+                alignment: Alignment.center,
+                child: TextButton(
+                  onPressed: widget.goToSignUpForm,
+                  child: const Text("Don't have an account? Create one here!"),
+                ),
+              )
             ],
           ),
         ),
