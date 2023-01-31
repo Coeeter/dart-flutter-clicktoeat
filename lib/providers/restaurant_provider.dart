@@ -1,17 +1,34 @@
 import 'dart:io';
 
 import 'package:clicktoeat/data/exceptions/default_exception.dart';
+import 'package:clicktoeat/domain/favorites/favorite_repo.dart';
 import 'package:clicktoeat/domain/restaurant/restaurant.dart';
 import 'package:clicktoeat/domain/restaurant/restaurant_repo.dart';
+import 'package:clicktoeat/domain/user/user.dart';
 import 'package:flutter/material.dart';
+
+class TransformedRestaurant {
+  Restaurant restaurant;
+  List<User> usersWhoFavRestaurant;
+
+  TransformedRestaurant({
+    required this.restaurant,
+    required this.usersWhoFavRestaurant,
+  });
+}
 
 class RestaurantProvider extends ChangeNotifier {
   final RestaurantRepo _restaurantRepo;
+  final FavoriteRepo _favoriteRepo;
   final BuildContext _context;
   bool isLoading = false;
-  List<Restaurant> restaurantList = [];
+  List<TransformedRestaurant> restaurantList = [];
 
-  RestaurantProvider(this._context, this._restaurantRepo) {
+  RestaurantProvider(
+    this._context,
+    this._restaurantRepo,
+    this._favoriteRepo,
+  ) {
     getRestaurants();
   }
 
@@ -19,7 +36,20 @@ class RestaurantProvider extends ChangeNotifier {
     isLoading = true;
     notifyListeners();
     try {
-      restaurantList = await _restaurantRepo.getAllRestaurants();
+      var restaurants = await _restaurantRepo.getAllRestaurants()
+        ..sort((a, b) {
+          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        });
+      var transformedRestaurants = restaurants.map((e) async {
+        var favorites = await _favoriteRepo.getFavsOfRestaurant(
+          restaurantId: e.id,
+        );
+        return TransformedRestaurant(
+          restaurant: e,
+          usersWhoFavRestaurant: favorites,
+        );
+      }).toList();
+      restaurantList = await Future.wait(transformedRestaurants);
       isLoading = false;
       notifyListeners();
     } on DefaultException catch (e) {
@@ -46,9 +76,14 @@ class RestaurantProvider extends ChangeNotifier {
         restaurantId: insertId,
       );
       restaurantList = restaurantList
-        ..add(restaurant)
+        ..add(
+          TransformedRestaurant(
+            restaurant: restaurant,
+            usersWhoFavRestaurant: [],
+          ),
+        )
         ..sort((a, b) {
-          return a.name.compareTo(b.name);
+          return a.restaurant.name.compareTo(b.restaurant.name);
         });
       notifyListeners();
     } on DefaultException catch (e) {
@@ -73,10 +108,20 @@ class RestaurantProvider extends ChangeNotifier {
         image: image,
         token: token,
       );
+      var favorites = await _favoriteRepo.getFavsOfRestaurant(
+        restaurantId: restaurantId,
+      );
       restaurantList = restaurantList
-        ..add(restaurant)
+        ..add(
+          TransformedRestaurant(
+            restaurant: restaurant,
+            usersWhoFavRestaurant: favorites,
+          ),
+        )
         ..sort((a, b) {
-          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+          return a.restaurant.name
+              .toLowerCase()
+              .compareTo(b.restaurant.name.toLowerCase());
         });
       notifyListeners();
     } on DefaultException catch (e) {
@@ -93,7 +138,7 @@ class RestaurantProvider extends ChangeNotifier {
         restaurantId: restaurantId,
       );
       restaurantList = restaurantList
-          .where((element) => element.id != restaurantId)
+          .where((element) => element.restaurant.id != restaurantId)
           .toList();
       notifyListeners();
     } on DefaultException catch (e) {

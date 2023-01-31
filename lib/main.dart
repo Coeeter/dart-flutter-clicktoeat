@@ -1,5 +1,7 @@
 import 'package:clicktoeat/data/comment/comment_repo_impl.dart';
 import 'package:clicktoeat/data/comment/remote/remote_comment_dao_impl.dart';
+import 'package:clicktoeat/data/favorites/favorite_repo_impl.dart';
+import 'package:clicktoeat/data/favorites/remote/remote_favorite_dao_impl.dart';
 import 'package:clicktoeat/data/restaurant/remote/remote_restaurant_dao_impl.dart';
 import 'package:clicktoeat/data/restaurant/restaurant_repo_impl.dart';
 import 'package:clicktoeat/data/user/local/local_user_dao_impl.dart';
@@ -17,6 +19,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: lightOrange,
+    ),
+  );
+
   var sharedPreferences = await SharedPreferences.getInstance();
 
   var userRepo = UserRepoImpl(
@@ -34,23 +42,31 @@ void main() async {
     remoteCommentDao: RemoteCommentDaoImpl(),
   );
 
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: lightOrange,
-    ),
+  var favoriteRepo = FavoriteRepoImpl(
+    remoteFavoriteDao: RemoteFavoriteDaoImpl(),
   );
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (context) => AuthProvider(context, userRepo),
+          create: (context) => AuthProvider(
+            context,
+            userRepo,
+          ),
         ),
         ChangeNotifierProvider(
-          create: (context) => RestaurantProvider(context, restaurantRepo),
+          create: (context) => RestaurantProvider(
+            context,
+            restaurantRepo,
+            favoriteRepo,
+          ),
         ),
         ChangeNotifierProvider(
-          create: (context) => CommentProvider(context, commentRepo),
+          create: (context) => CommentProvider(
+            context,
+            commentRepo,
+          ),
         ),
       ],
       child: const CltApp(),
