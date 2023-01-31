@@ -8,7 +8,10 @@ class RestaurantCard extends StatelessWidget {
   final TransformedRestaurant transformedRestaurant;
   final List<Comment> commentsOfRestaurant;
   final User? currentUser;
-  final void Function() toggleFavorite;
+  final void Function(
+    bool toAddToFav,
+    String restaurantId,
+  ) toggleFavorite;
 
   const RestaurantCard({
     Key? key,
@@ -26,7 +29,9 @@ class RestaurantCard extends StatelessWidget {
   }
 
   bool get isFavoritedByCurrentUser {
-    return commentsOfRestaurant.map((e) => e.user.id).contains(currentUser?.id);
+    return transformedRestaurant.usersWhoFavRestaurant
+        .map((e) => e.id)
+        .contains(currentUser?.id);
   }
 
   @override
@@ -70,7 +75,12 @@ class RestaurantCard extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          toggleFavorite(
+                            !isFavoritedByCurrentUser,
+                            transformedRestaurant.restaurant.id,
+                          );
+                        },
                         icon: ShaderMask(
                           blendMode: BlendMode.srcIn,
                           shaderCallback: (bounds) {

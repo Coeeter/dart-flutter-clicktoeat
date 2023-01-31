@@ -59,6 +59,60 @@ class RestaurantProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> addRestaurantToFavorite(
+    String token,
+    String restaurantId,
+    User currentUser,
+  ) async {
+    var oldRestaurantList = restaurantList;
+    restaurantList = restaurantList.map((e) {
+      if (e.restaurant.id != restaurantId) return e;
+      e.usersWhoFavRestaurant = e.usersWhoFavRestaurant..add(currentUser);
+      return e;
+    }).toList();
+    notifyListeners();
+    try {
+      await _favoriteRepo.addFavorite(
+        token: token,
+        restaurantId: restaurantId,
+      );
+    } on DefaultException catch (e) {
+      restaurantList = oldRestaurantList;
+      notifyListeners();
+      ScaffoldMessenger.of(_context).showSnackBar(
+        SnackBar(content: Text(e.error)),
+      );
+    }
+  }
+
+  Future<void> removeRestaurantFromFavorite(
+    String token,
+    String restaurantId,
+    User currentUser,
+  ) async {
+    var oldRestaurantList = restaurantList;
+    restaurantList = restaurantList.map((e) {
+      if (e.restaurant.id != restaurantId) return e;
+      e.usersWhoFavRestaurant = e.usersWhoFavRestaurant
+          .where((element) => element.id != currentUser.id)
+          .toList();
+      return e;
+    }).toList();
+    notifyListeners();
+    try {
+      await _favoriteRepo.removeFavorite(
+        token: token,
+        restaurantId: restaurantId,
+      );
+    } on DefaultException catch (e) {
+      restaurantList = oldRestaurantList;
+      notifyListeners();
+      ScaffoldMessenger.of(_context).showSnackBar(
+        SnackBar(content: Text(e.error)),
+      );
+    }
+  }
+
   Future<void> createRestaurant(
     String token,
     String name,
