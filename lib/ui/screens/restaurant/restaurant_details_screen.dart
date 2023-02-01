@@ -16,6 +16,6 @@ class RestaurantDetailsScreen extends StatefulWidget {
 class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const Scaffold();
   }
 }

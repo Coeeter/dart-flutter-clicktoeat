@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:clicktoeat/domain/comment/comment.dart';
 import 'package:clicktoeat/domain/user/user.dart';
 import 'package:clicktoeat/providers/restaurant_provider.dart';
@@ -37,104 +38,122 @@ class RestaurantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.all(5),
-      child: Material(
-        elevation: 4,
-        child: InkWell(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => RestaurantDetailsScreen(
-                restaurantId: transformedRestaurant.restaurant.id,
+      child: OpenContainer(
+        closedBuilder: (context, openContainer) => _buildClosedContent(
+          context,
+          openContainer,
+        ),
+        openBuilder: (context, closeContainer) => RestaurantDetailsScreen(
+          restaurantId: transformedRestaurant.restaurant.id,
+        ),
+        closedElevation: 4,
+        closedColor: isDarkMode
+            ? ElevationOverlay.colorWithOverlay(
+                Theme.of(context).colorScheme.surface,
+                Theme.of(context).colorScheme.onSurface,
+                4,
+              )
+            : Colors.white,
+        closedShape: const BeveledRectangleBorder(),
+        transitionDuration: const Duration(milliseconds: 500),
+        transitionType: ContainerTransitionType.fadeThrough,
+        openColor: Theme.of(context).scaffoldBackgroundColor,
+      ),
+    );
+  }
+
+  Widget _buildClosedContent(
+    BuildContext context,
+    void Function() openContainer,
+  ) {
+    return InkWell(
+      onTap: openContainer,
+      splashFactory: InkRipple.splashFactory,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: mediumOrange,
+                width: 2,
+              ),
+            ),
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: Image.network(
+                transformedRestaurant.restaurant.image!.url,
               ),
             ),
           ),
-          splashFactory: InkRipple.splashFactory,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: mediumOrange,
-                    width: 2,
-                  ),
-                ),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Image.network(
-                    transformedRestaurant.restaurant.image!.url,
-                  ),
-                ),
-              ),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.only(left: 10, bottom: 10),
-                child: Column(
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(left: 10, bottom: 10),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            transformedRestaurant.restaurant.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.headline6,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            toggleFavorite(
-                              !isFavoritedByCurrentUser,
-                              transformedRestaurant.restaurant.id,
-                            );
-                          },
-                          icon: ShaderMask(
-                            blendMode: BlendMode.srcIn,
-                            shaderCallback: (bounds) {
-                              return const LinearGradient(
-                                colors: [lightOrange, mediumOrange],
-                              ).createShader(
-                                Rect.fromLTWH(
-                                    0, 0, bounds.width, bounds.height),
-                              );
-                            },
-                            child: Icon(
-                              isFavoritedByCurrentUser
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                            ),
-                          ),
-                          splashRadius: 20,
-                        )
-                      ],
+                    Expanded(
+                      child: Text(
+                        transformedRestaurant.restaurant.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.headline6,
+                      ),
                     ),
-                    Row(
-                      children: [
-                        const Icon(Icons.star, color: mediumOrange),
-                        const SizedBox(width: 2),
-                        Text(
-                          averageRating.toStringAsFixed(1),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
+                    IconButton(
+                      onPressed: () {
+                        toggleFavorite(
+                          !isFavoritedByCurrentUser,
+                          transformedRestaurant.restaurant.id,
+                        );
+                      },
+                      icon: ShaderMask(
+                        blendMode: BlendMode.srcIn,
+                        shaderCallback: (bounds) {
+                          return const LinearGradient(
+                            colors: [lightOrange, mediumOrange],
+                          ).createShader(
+                            Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+                          );
+                        },
+                        child: Icon(
+                          isFavoritedByCurrentUser
+                              ? Icons.favorite
+                              : Icons.favorite_border,
                         ),
-                        Text(
-                          "/5 (${commentsOfRestaurant.length})",
-                          style: const TextStyle(fontSize: 18),
-                        )
-                      ],
+                      ),
+                      splashRadius: 20,
                     )
                   ],
                 ),
-              )
-            ],
-          ),
-        ),
+                Row(
+                  children: [
+                    const Icon(Icons.star, color: mediumOrange),
+                    const SizedBox(width: 2),
+                    Text(
+                      averageRating.toStringAsFixed(1),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    Text(
+                      "/5 (${commentsOfRestaurant.length})",
+                      style: const TextStyle(fontSize: 18),
+                    )
+                  ],
+                )
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
