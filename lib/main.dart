@@ -1,3 +1,5 @@
+import 'package:clicktoeat/data/branch/branch_repo_impl.dart';
+import 'package:clicktoeat/data/branch/remote/remote_branch_dao_impl.dart';
 import 'package:clicktoeat/data/comment/comment_repo_impl.dart';
 import 'package:clicktoeat/data/comment/remote/remote_comment_dao_impl.dart';
 import 'package:clicktoeat/data/favorites/favorite_repo_impl.dart';
@@ -24,28 +26,25 @@ void main() async {
       statusBarColor: lightOrange,
     ),
   );
-
   var sharedPreferences = await SharedPreferences.getInstance();
-
   var userRepo = UserRepoImpl(
     remoteUserDao: RemoteUserDaoImpl(),
     localUserDao: LocalUserDaoImpl(
       preferences: sharedPreferences,
     ),
   );
-
   var restaurantRepo = RestaurantRepoImpl(
     restaurantDao: RemoteRestaurantDaoImpl(),
   );
-
   var commentRepo = CommentRepoImpl(
     remoteCommentDao: RemoteCommentDaoImpl(),
   );
-
   var favoriteRepo = FavoriteRepoImpl(
     remoteFavoriteDao: RemoteFavoriteDaoImpl(),
   );
-
+  var branchRepo = BranchRepoImpl(
+    remoteBranchDao: RemoteBranchDaoImpl(),
+  );
   runApp(
     MultiProvider(
       providers: [
@@ -60,6 +59,7 @@ void main() async {
             context,
             restaurantRepo,
             favoriteRepo,
+            branchRepo,
           ),
         ),
         ChangeNotifierProvider(

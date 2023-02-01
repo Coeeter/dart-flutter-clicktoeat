@@ -23,8 +23,8 @@ class RemoteBranchDaoImpl extends NetworkUtils implements RemoteBranchDao {
       headers: createAuthorizationHeader(token),
       body: {
         "address": address,
-        "latitude": latitude,
-        "longitude": longitude,
+        "latitude": latitude.toString(),
+        "longitude": longitude.toString(),
       },
     );
     if (response.statusCode == 400) {

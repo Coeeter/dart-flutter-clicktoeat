@@ -29,25 +29,19 @@ class CommentProvider extends ChangeNotifier {
     String review,
     int rating,
   ) async {
-    try {
-      var insertId = await _commentRepo.createComment(
-        token: token,
-        restaurantId: restaurantId,
-        review: review,
-        rating: rating,
-      );
-      var comment = await _commentRepo.getCommentById(id: insertId);
-      commentList = commentList
-        ..add(comment)
-        ..sort((a, b) {
-          return b.updatedAt.compareTo(a.updatedAt);
-        });
-      notifyListeners();
-    } on DefaultException catch (e) {
-      ScaffoldMessenger.of(_context).showSnackBar(
-        SnackBar(content: Text(e.error)),
-      );
-    }
+    var insertId = await _commentRepo.createComment(
+      token: token,
+      restaurantId: restaurantId,
+      review: review,
+      rating: rating,
+    );
+    var comment = await _commentRepo.getCommentById(id: insertId);
+    commentList = commentList
+      ..add(comment)
+      ..sort((a, b) {
+        return b.updatedAt.compareTo(a.updatedAt);
+      });
+    notifyListeners();
   }
 
   Future<void> updateComment(
@@ -56,40 +50,28 @@ class CommentProvider extends ChangeNotifier {
     String review,
     int rating,
   ) async {
-    try {
-      var comment = await _commentRepo.updateComment(
-        token: token,
-        commentId: commentId,
-        review: review,
-        rating: rating,
-      );
-      commentList = commentList
-        ..add(comment)
-        ..sort((a, b) {
-          return b.updatedAt.compareTo(a.updatedAt);
-        });
-      notifyListeners();
-    } on DefaultException catch (e) {
-      ScaffoldMessenger.of(_context).showSnackBar(
-        SnackBar(content: Text(e.error)),
-      );
-    }
+    var comment = await _commentRepo.updateComment(
+      token: token,
+      commentId: commentId,
+      review: review,
+      rating: rating,
+    );
+    commentList = commentList
+      ..add(comment)
+      ..sort((a, b) {
+        return b.updatedAt.compareTo(a.updatedAt);
+      });
+    notifyListeners();
   }
 
   Future<void> deleteComment(String token, String commentId) async {
-    try {
-      await _commentRepo.deleteComment(
-        token: token,
-        commentId: commentId,
-      );
-      commentList = commentList.where((element) {
-        return element.id != commentId;
-      }).toList();
-      notifyListeners();
-    } on DefaultException catch (e) {
-      ScaffoldMessenger.of(_context).showSnackBar(
-        SnackBar(content: Text(e.error)),
-      );
-    }
+    await _commentRepo.deleteComment(
+      token: token,
+      commentId: commentId,
+    );
+    commentList = commentList.where((element) {
+      return element.id != commentId;
+    }).toList();
+    notifyListeners();
   }
 }

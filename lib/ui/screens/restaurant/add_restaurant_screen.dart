@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:animations/animations.dart';
 import 'package:clicktoeat/data/exceptions/default_exception.dart';
 import 'package:clicktoeat/data/exceptions/field_exception.dart';
 import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:clicktoeat/providers/restaurant_provider.dart';
 import 'package:clicktoeat/ui/components/buttons/clt_gradient_button.dart';
+import 'package:clicktoeat/ui/screens/restaurant/add_branch_screen.dart';
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -22,6 +24,52 @@ class AddRestaurantScreen extends StatefulWidget {
 }
 
 class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
+  String? createdRestaurantId;
+
+  @override
+  Widget build(BuildContext context) {
+    return PageTransitionSwitcher(
+      duration: const Duration(milliseconds: 1000),
+      transitionBuilder: (child, primaryAnimation, secondaryAnimation) {
+        return SharedAxisTransition(
+          animation: primaryAnimation,
+          secondaryAnimation: secondaryAnimation,
+          transitionType: SharedAxisTransitionType.horizontal,
+          child: child,
+        );
+      },
+      child: createdRestaurantId == null
+          ? AddRestaurantForm(
+              key: const ValueKey(0),
+              navigateBack: widget.navigateBack,
+              navigateToNextStage: (restaurantId) => setState(() {
+                createdRestaurantId = restaurantId;
+              }),
+            )
+          : AddBranchScreen(
+              key: const ValueKey(1),
+              restaurantId: createdRestaurantId!,
+              navigateBack: widget.navigateBack,
+            ),
+    );
+  }
+}
+
+class AddRestaurantForm extends StatefulWidget {
+  final void Function() navigateBack;
+  final void Function(String restaurantId) navigateToNextStage;
+
+  const AddRestaurantForm({
+    Key? key,
+    required this.navigateBack,
+    required this.navigateToNextStage,
+  }) : super(key: key);
+
+  @override
+  State<AddRestaurantForm> createState() => _AddRestaurantFormState();
+}
+
+class _AddRestaurantFormState extends State<AddRestaurantForm> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   File? _image;
   String? _imageError;
@@ -48,6 +96,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
     setState(() {
       _isLoading = true;
     });
+    String insertId;
     try {
       var restaurantProvider = Provider.of<RestaurantProvider>(
         context,
@@ -58,7 +107,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
         listen: false,
       );
       await authProvider.getToken();
-      await restaurantProvider.createRestaurant(
+      insertId = await restaurantProvider.createRestaurant(
         authProvider.token!,
         _name,
         _description,
@@ -88,7 +137,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
         _isLoading = false;
       });
     }
-    widget.navigateBack(); // TODO: Change to add branch state
+    widget.navigateToNextStage(insertId);
   }
 
   @override
@@ -110,7 +159,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _imagePicker(),
-              const SizedBox(height: 30),
+              const SizedBox(height: 10),
               Material(
                 elevation: 4,
                 child: Container(
