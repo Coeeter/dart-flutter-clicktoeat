@@ -82,6 +82,7 @@ class RestaurantCard extends StatelessWidget {
                 color: mediumOrange,
                 width: 2,
               ),
+              color: Colors.white,
             ),
             child: AspectRatio(
               aspectRatio: 1,
