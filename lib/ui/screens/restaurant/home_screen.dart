@@ -1,12 +1,15 @@
-import 'dart:math';
 import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:clicktoeat/providers/comment_provider.dart';
 import 'package:clicktoeat/providers/restaurant_provider.dart';
 import 'package:clicktoeat/ui/components/clt_restaurant_card.dart';
 import 'package:clicktoeat/ui/components/typography/clt_heading.dart';
 import 'package:clicktoeat/ui/screens/auth/auth_screen.dart';
+import 'package:clicktoeat/ui/screens/restaurant/restaurant_details_screen.dart';
 import 'package:clicktoeat/ui/theme/colors.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -75,6 +78,13 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const Padding(
                       padding: EdgeInsets.all(5),
+                      child: CltHeading(text: "Restaurants near you"),
+                    ),
+                    RestaurantsNearYouSection(
+                      restaurantProvider: restaurantProvider,
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.all(5),
                       child: CltHeading(text: "All Restaurants"),
                     ),
                     AllRestaurantsSection(
@@ -86,6 +96,67 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
+    );
+  }
+}
+
+class RestaurantsNearYouSection extends StatelessWidget {
+  final RestaurantProvider restaurantProvider;
+
+  const RestaurantsNearYouSection({
+    Key? key,
+    required this.restaurantProvider,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    var initialCameraPosition = const CameraPosition(
+      target: LatLng(1.3610, 103.8200),
+      zoom: 10.25,
+    );
+
+    var branches = restaurantProvider.restaurantList
+        .map((e) => e.restaurant.branches)
+        .expand((e) => e)
+        .toList();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(5),
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: GoogleMap(
+          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+            Factory<OneSequenceGestureRecognizer>(
+              () => EagerGestureRecognizer(),
+            ),
+          },
+          initialCameraPosition: initialCameraPosition,
+          markers: branches
+              .map(
+                (e) => Marker(
+                  markerId: MarkerId(e.id),
+                  position: LatLng(
+                    e.latitude,
+                    e.longitude,
+                  ),
+                  infoWindow: InfoWindow(
+                    title: e.restaurant.name,
+                    snippet: e.address,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => RestaurantDetailsScreen(
+                          restaurantId: e.restaurant.id,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+              .toSet(),
+        ),
+      ),
     );
   }
 }
@@ -186,7 +257,8 @@ class FavoriteRestaurantsSection extends StatelessWidget {
               .map((e) => e.id)
               .contains(currentUser?.id),
         )
-        .toList();
+        .toList()
+      ..sort((a, b) => a.restaurant.name.compareTo(b.restaurant.name));
 
     if (favoriteRestaurants.isEmpty) return const EmptyFavoritesContent();
 
@@ -220,7 +292,7 @@ class FavoriteRestaurantsSection extends StatelessWidget {
             ),
           );
         },
-        itemCount: min(favoriteRestaurants.length, 5),
+        itemCount: favoriteRestaurants.length,
       ),
     );
   }
