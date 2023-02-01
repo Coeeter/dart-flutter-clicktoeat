@@ -59,7 +59,19 @@ class RestaurantProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> addRestaurantToFavorite(
+  Future<void> toggleRestaurantFavorite(
+    String token,
+    String restaurantId,
+    User currentUser,
+    bool toAddToFav,
+  ) async {
+    if (toAddToFav) {
+      return await _addRestaurantToFavorite(token, restaurantId, currentUser);
+    }
+    await _removeRestaurantFromFavorite(token, restaurantId, currentUser);
+  }
+
+  Future<void> _addRestaurantToFavorite(
     String token,
     String restaurantId,
     User currentUser,
@@ -85,7 +97,7 @@ class RestaurantProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> removeRestaurantFromFavorite(
+  Future<void> _removeRestaurantFromFavorite(
     String token,
     String restaurantId,
     User currentUser,

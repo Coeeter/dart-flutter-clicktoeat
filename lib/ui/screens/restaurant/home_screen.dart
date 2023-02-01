@@ -20,49 +20,6 @@ class HomeScreen extends StatelessWidget {
 
     var currentUser = authProvider.user;
 
-    List<List<TransformedRestaurant>> restaurantList = [];
-
-    for (var i = 0; i < restaurantProvider.restaurantList.length; i += 2) {
-      var items = [restaurantProvider.restaurantList[i]];
-      if (i + 1 == restaurantProvider.restaurantList.length) {
-        restaurantList.add(items);
-        break;
-      }
-      items.add(restaurantProvider.restaurantList[i + 1]);
-      restaurantList.add(items);
-    }
-
-    var favoriteRestaurants = restaurantProvider.restaurantList
-        .where(
-          (element) => element.usersWhoFavRestaurant
-              .map((e) => e.id)
-              .contains(currentUser?.id),
-        )
-        .toList();
-
-    var featuredRestaurants = restaurantProvider.restaurantList
-      ..sort((a, b) {
-        var commentsOfA = commentProvider.commentList.where((element) {
-          return element.restaurant.id == a.restaurant.id;
-        });
-        var commentsOfB = commentProvider.commentList.where((element) {
-          return element.restaurant.id == b.restaurant.id;
-        });
-
-        var totalRatingOfA = commentsOfA.fold<int>(0, (value, element) {
-          return value + element.rating;
-        });
-        var totalRatingOfB = commentsOfB.fold<int>(0, (value, element) {
-          return value + element.rating;
-        });
-
-        var averateRatingOfA =
-            commentsOfA.isEmpty ? 0 : totalRatingOfA / commentsOfA.length;
-        var averateRatingOfB =
-            commentsOfB.isEmpty ? 0 : totalRatingOfB / commentsOfB.length;
-        return averateRatingOfB.compareTo(averateRatingOfA);
-      });
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -102,212 +59,280 @@ class HomeScreen extends StatelessWidget {
                       padding: EdgeInsets.all(5),
                       child: CltHeading(text: "Your Favorite Restaurants"),
                     ),
-                    favoriteRestaurants.isNotEmpty
-                        ? SizedBox(
-                            width: double.infinity,
-                            height: 278.4,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              shrinkWrap: true,
-                              itemBuilder: (context, index) {
-                                return SizedBox(
-                                  width: MediaQuery.of(context).size.width / 2,
-                                  child: RestaurantCard(
-                                    toggleFavorite: (toAddToFav, restaurantId) {
-                                      if (toAddToFav) {
-                                        restaurantProvider
-                                            .addRestaurantToFavorite(
-                                          authProvider.token!,
-                                          restaurantId,
-                                          currentUser!,
-                                        );
-                                        return;
-                                      }
-                                      restaurantProvider
-                                          .removeRestaurantFromFavorite(
-                                        authProvider.token!,
-                                        restaurantId,
-                                        currentUser!,
-                                      );
-                                    },
-                                    commentsOfRestaurant:
-                                        commentProvider.commentList
-                                            .where(
-                                              (element) =>
-                                                  element.restaurant.id ==
-                                                  favoriteRestaurants[index]
-                                                      .restaurant
-                                                      .id,
-                                            )
-                                            .toList(),
-                                    currentUser: currentUser,
-                                    transformedRestaurant:
-                                        favoriteRestaurants[index],
-                                  ),
-                                );
-                              },
-                              itemCount: min(favoriteRestaurants.length, 5),
-                            ),
-                          )
-                        : Column(
-                            children: [
-                              ShaderMask(
-                                blendMode: BlendMode.srcIn,
-                                shaderCallback: (bounds) {
-                                  return const LinearGradient(
-                                    colors: [lightOrange, mediumOrange],
-                                  ).createShader(
-                                    Rect.fromLTWH(
-                                        0, 0, bounds.width, bounds.height),
-                                  );
-                                },
-                                child: const Icon(
-                                  Icons.heart_broken,
-                                  size: 200,
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  "Wow such empty...\nTry favoriting a restaurant now!",
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headline6!
-                                      .copyWith(
-                                        fontWeight: FontWeight.normal,
-                                      ),
-                                ),
-                              ),
-                            ],
-                          ),
+                    FavoriteRestaurantsSection(
+                      restaurantProvider: restaurantProvider,
+                      authProvider: authProvider,
+                      commentProvider: commentProvider,
+                    ),
                     const Padding(
                       padding: EdgeInsets.all(5),
                       child: CltHeading(text: "Featured Restaurants"),
                     ),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 278.4,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        shrinkWrap: true,
-                        itemBuilder: (context, index) {
-                          return SizedBox(
-                            width: MediaQuery.of(context).size.width / 2,
-                            child: RestaurantCard(
-                              toggleFavorite: (toAddToFav, restaurantId) {
-                                if (toAddToFav) {
-                                  restaurantProvider.addRestaurantToFavorite(
-                                    authProvider.token!,
-                                    restaurantId,
-                                    currentUser!,
-                                  );
-                                  return;
-                                }
-                                restaurantProvider.removeRestaurantFromFavorite(
-                                  authProvider.token!,
-                                  restaurantId,
-                                  currentUser!,
-                                );
-                              },
-                              currentUser: currentUser,
-                              commentsOfRestaurant:
-                                  commentProvider.commentList.where(
-                                (element) {
-                                  return element.restaurant.id ==
-                                      featuredRestaurants[index].restaurant.id;
-                                },
-                              ).toList(),
-                              transformedRestaurant: featuredRestaurants[index],
-                            ),
-                          );
-                        },
-                        itemCount: 5,
-                      ),
+                    FeaturedRestaurantSection(
+                      restaurantProvider: restaurantProvider,
+                      authProvider: authProvider,
+                      commentProvider: commentProvider,
                     ),
                     const Padding(
                       padding: EdgeInsets.all(5),
                       child: CltHeading(text: "All Restaurants"),
                     ),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: RestaurantCard(
-                                toggleFavorite: (toAddToFav, restaurantId) {
-                                  if (toAddToFav) {
-                                    restaurantProvider.addRestaurantToFavorite(
-                                      authProvider.token!,
-                                      restaurantId,
-                                      currentUser!,
-                                    );
-                                    return;
-                                  }
-                                  restaurantProvider
-                                      .removeRestaurantFromFavorite(
-                                    authProvider.token!,
-                                    restaurantId,
-                                    currentUser!,
-                                  );
-                                },
-                                currentUser: currentUser,
-                                commentsOfRestaurant: commentProvider
-                                    .commentList
-                                    .where((element) {
-                                  return element.restaurant.id ==
-                                      restaurantList[index][0].restaurant.id;
-                                }).toList(),
-                                transformedRestaurant: restaurantList[index][0],
-                              ),
-                            ),
-                            Expanded(
-                              child: restaurantList[index].length == 1
-                                  ? Container()
-                                  : RestaurantCard(
-                                      toggleFavorite:
-                                          (toAddToFav, restaurantId) {
-                                        if (toAddToFav) {
-                                          restaurantProvider
-                                              .addRestaurantToFavorite(
-                                            authProvider.token!,
-                                            restaurantId,
-                                            currentUser!,
-                                          );
-                                          return;
-                                        }
-                                        restaurantProvider
-                                            .removeRestaurantFromFavorite(
-                                          authProvider.token!,
-                                          restaurantId,
-                                          currentUser!,
-                                        );
-                                      },
-                                      currentUser: currentUser,
-                                      commentsOfRestaurant: commentProvider
-                                          .commentList
-                                          .where((element) {
-                                        return element.restaurant.id ==
-                                            restaurantList[index][1]
-                                                .restaurant
-                                                .id;
-                                      }).toList(),
-                                      transformedRestaurant:
-                                          restaurantList[index][1],
-                                    ),
-                            ),
-                          ],
-                        );
-                      },
-                      itemCount: restaurantList.length,
+                    AllRestaurantsSection(
+                      restaurantProvider: restaurantProvider,
+                      authProvider: authProvider,
+                      commentProvider: commentProvider,
                     ),
                   ],
                 ),
               ),
             ),
+    );
+  }
+}
+
+class FeaturedRestaurantSection extends StatelessWidget {
+  const FeaturedRestaurantSection({
+    Key? key,
+    required this.restaurantProvider,
+    required this.authProvider,
+    required this.commentProvider,
+  }) : super(key: key);
+
+  final RestaurantProvider restaurantProvider;
+  final AuthProvider authProvider;
+  final CommentProvider commentProvider;
+
+  @override
+  Widget build(BuildContext context) {
+    var currentUser = authProvider.user;
+
+    var featuredRestaurants = restaurantProvider.restaurantList
+      ..sort((a, b) {
+        var commentsOfA = commentProvider.commentList.where((element) {
+          return element.restaurant.id == a.restaurant.id;
+        });
+        var commentsOfB = commentProvider.commentList.where((element) {
+          return element.restaurant.id == b.restaurant.id;
+        });
+
+        var totalRatingOfA = commentsOfA.fold<int>(0, (value, element) {
+          return value + element.rating;
+        });
+        var totalRatingOfB = commentsOfB.fold<int>(0, (value, element) {
+          return value + element.rating;
+        });
+
+        var averateRatingOfA =
+            commentsOfA.isEmpty ? 0 : totalRatingOfA / commentsOfA.length;
+        var averateRatingOfB =
+            commentsOfB.isEmpty ? 0 : totalRatingOfB / commentsOfB.length;
+        return averateRatingOfB.compareTo(averateRatingOfA);
+      });
+
+    return SizedBox(
+      width: double.infinity,
+      height: 278.4,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        shrinkWrap: true,
+        itemBuilder: (context, index) {
+          return SizedBox(
+            width: MediaQuery.of(context).size.width / 2,
+            child: RestaurantCard(
+              toggleFavorite: (toAddToFav, restaurantId) {
+                restaurantProvider.toggleRestaurantFavorite(
+                  authProvider.token!,
+                  restaurantId,
+                  currentUser!,
+                  toAddToFav,
+                );
+              },
+              currentUser: currentUser,
+              commentsOfRestaurant: commentProvider.commentList.where(
+                (element) {
+                  return element.restaurant.id ==
+                      featuredRestaurants[index].restaurant.id;
+                },
+              ).toList(),
+              transformedRestaurant: featuredRestaurants[index],
+            ),
+          );
+        },
+        itemCount: 5,
+      ),
+    );
+  }
+}
+
+class FavoriteRestaurantsSection extends StatelessWidget {
+  const FavoriteRestaurantsSection({
+    Key? key,
+    required this.restaurantProvider,
+    required this.authProvider,
+    required this.commentProvider,
+  }) : super(key: key);
+
+  final RestaurantProvider restaurantProvider;
+  final AuthProvider authProvider;
+  final CommentProvider commentProvider;
+
+  @override
+  Widget build(BuildContext context) {
+    var currentUser = authProvider.user;
+
+    var favoriteRestaurants = restaurantProvider.restaurantList
+        .where(
+          (element) => element.usersWhoFavRestaurant
+              .map((e) => e.id)
+              .contains(currentUser?.id),
+        )
+        .toList();
+
+    if (favoriteRestaurants.isEmpty) return const EmptyFavoritesContent();
+
+    return SizedBox(
+      width: double.infinity,
+      height: 278.4,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        shrinkWrap: true,
+        itemBuilder: (context, index) {
+          return SizedBox(
+            width: MediaQuery.of(context).size.width / 2,
+            child: RestaurantCard(
+              toggleFavorite: (toAddToFav, restaurantId) {
+                restaurantProvider.toggleRestaurantFavorite(
+                  authProvider.token!,
+                  restaurantId,
+                  currentUser!,
+                  toAddToFav,
+                );
+              },
+              commentsOfRestaurant: commentProvider.commentList
+                  .where(
+                    (element) =>
+                        element.restaurant.id ==
+                        favoriteRestaurants[index].restaurant.id,
+                  )
+                  .toList(),
+              currentUser: currentUser,
+              transformedRestaurant: favoriteRestaurants[index],
+            ),
+          );
+        },
+        itemCount: min(favoriteRestaurants.length, 5),
+      ),
+    );
+  }
+}
+
+class EmptyFavoritesContent extends StatelessWidget {
+  const EmptyFavoritesContent({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ShaderMask(
+          blendMode: BlendMode.srcIn,
+          shaderCallback: (bounds) {
+            return const LinearGradient(
+              colors: [lightOrange, mediumOrange],
+            ).createShader(
+              Rect.fromLTWH(
+                0,
+                0,
+                bounds.width,
+                bounds.height,
+              ),
+            );
+          },
+          child: const Icon(
+            Icons.heart_broken,
+            size: 200,
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.all(10),
+          alignment: Alignment.center,
+          child: Text(
+            "Wow such empty...\nTry favoriting a restaurant now!",
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.headline6!.copyWith(
+                  fontWeight: FontWeight.normal,
+                ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class AllRestaurantsSection extends StatelessWidget {
+  final RestaurantProvider restaurantProvider;
+  final AuthProvider authProvider;
+  final CommentProvider commentProvider;
+
+  const AllRestaurantsSection({
+    Key? key,
+    required this.restaurantProvider,
+    required this.authProvider,
+    required this.commentProvider,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    var currentUser = authProvider.user;
+
+    List<List<TransformedRestaurant>> restaurantList = [];
+
+    for (var i = 0; i < restaurantProvider.restaurantList.length; i += 2) {
+      var items = [restaurantProvider.restaurantList[i]];
+      if (i + 1 == restaurantProvider.restaurantList.length) {
+        restaurantList.add(items);
+        break;
+      }
+      items.add(restaurantProvider.restaurantList[i + 1]);
+      restaurantList.add(items);
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemBuilder: (context, index) {
+        return Row(
+          children: [
+            ...restaurantList[index]
+                .map(
+                  (e) => Expanded(
+                    child: RestaurantCard(
+                      toggleFavorite: (toAddToFav, restaurantId) {
+                        restaurantProvider.toggleRestaurantFavorite(
+                          authProvider.token!,
+                          restaurantId,
+                          currentUser!,
+                          toAddToFav,
+                        );
+                      },
+                      commentsOfRestaurant: commentProvider.commentList
+                          .where(
+                            (element) =>
+                                element.restaurant.id == e.restaurant.id,
+                          )
+                          .toList(),
+                      currentUser: currentUser,
+                      transformedRestaurant: e,
+                    ),
+                  ),
+                )
+                .toList(),
+            if (restaurantList[index].length == 1) Expanded(child: Container()),
+          ],
+        );
+      },
+      itemCount: restaurantList.length,
     );
   }
 }
