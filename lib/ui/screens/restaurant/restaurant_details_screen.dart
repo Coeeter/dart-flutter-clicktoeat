@@ -110,8 +110,12 @@ class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
               const SizedBox(height: 10),
               ReviewForm(restaurantId: widget.restaurantId),
               const SizedBox(height: 10),
-              if (commentsOfRestaurant.isNotEmpty)
-                Column(
+              AnimatedCrossFade(
+                crossFadeState: commentsOfRestaurant.isNotEmpty
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
+                duration: const Duration(milliseconds: 300),
+                firstChild: Column(
                   children: [
                     CltReviewMetaData(
                       commentsOfRestaurant: commentsOfRestaurant,
@@ -119,7 +123,42 @@ class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
                     const SizedBox(height: 10),
                     _buildLatestComments(commentsOfRestaurant, context),
                   ],
-                )
+                ),
+                secondChild: SizedBox(
+                  width: double.infinity,
+                  child: Column(
+                    children: [
+                      ShaderMask(
+                        blendMode: BlendMode.srcIn,
+                        shaderCallback: (bounds) => const LinearGradient(
+                          colors: [lightOrange, mediumOrange],
+                        ).createShader(
+                          Rect.fromLTWH(
+                            0,
+                            0,
+                            bounds.width,
+                            bounds.height,
+                          ),
+                        ),
+                        child: const Icon(Icons.rate_review, size: 150),
+                      ),
+                      const Text(
+                        "No reviews yet",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Text(
+                        "Be the first to review this restaurant",
+                        style: TextStyle(
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),

@@ -76,7 +76,7 @@ class CltReviewMetaData extends StatelessWidget {
                             ),
                             clipBehavior: Clip.hardEdge,
                             child: TweenAnimationBuilder<double>(
-                              duration: const Duration(milliseconds: 250),
+                              duration: const Duration(milliseconds: 500),
                               curve: Curves.fastOutSlowIn,
                               tween: Tween(
                                 begin: 0,
