@@ -1,4 +1,5 @@
 import 'package:animations/animations.dart';
+import 'package:clicktoeat/domain/user/user.dart';
 import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:clicktoeat/providers/restaurant_provider.dart';
 import 'package:clicktoeat/providers/user_provider.dart';
@@ -100,97 +101,159 @@ class _SearchScreenState extends State<SearchScreen> {
             children: [
               const CltHeading(text: "Restaurants"),
               const SizedBox(height: 10),
-              ...restaurantList.map(
-                (e) {
-                  var isFavoritedByCurrentUser = e.usersWhoFavRestaurant.any(
-                    (element) => element.id == currentUser.id,
-                  );
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: OpenContainer(
-                      closedBuilder: (context, openContainer) {
-                        return _buildSearchCard(
-                          leadingImageUrl: e.restaurant.image!.url,
-                          title: e.restaurant.name,
-                          onTap: openContainer,
-                          trailing: ShaderMask(
-                            blendMode: BlendMode.srcIn,
-                            shaderCallback: (bounds) => const LinearGradient(
-                              colors: [lightOrange, mediumOrange],
-                            ).createShader(bounds),
-                            child: IconButton(
-                              splashRadius: 20,
-                              icon: Icon(
-                                isFavoritedByCurrentUser
-                                    ? Icons.favorite
-                                    : Icons.favorite_border,
-                              ),
-                              onPressed: () {
-                                restaurantProvider.toggleRestaurantFavorite(
-                                  token,
-                                  e.restaurant.id,
-                                  currentUser,
-                                  !isFavoritedByCurrentUser,
-                                );
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                      closedColor: ElevationOverlay.colorWithOverlay(
-                        Theme.of(context).colorScheme.surface,
-                        Colors.white,
-                        4,
-                      ),
-                      closedElevation: 4,
-                      openElevation: 0,
-                      transitionDuration: const Duration(milliseconds: 500),
-                      transitionType: ContainerTransitionType.fadeThrough,
-                      openBuilder: (context, _) {
-                        return RestaurantDetailsScreen(
-                          restaurantId: e.restaurant.id,
-                        );
-                      },
-                    ),
-                  );
-                },
+              _buildRestaurantCards(
+                restaurantList,
+                currentUser,
+                restaurantProvider,
+                token,
               ),
+              if (restaurantList.isEmpty)
+                Material(
+                  elevation: 4,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      children: [
+                        Text(
+                          "No restaurants found",
+                          style: Theme.of(context).textTheme.headline6,
+                        ),
+                        Text(
+                          "Try searching for something else",
+                          style: Theme.of(context).textTheme.bodyText1,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               const SizedBox(height: 10),
               const CltHeading(text: "Users"),
               const SizedBox(height: 10),
-              ...userList.map((e) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: OpenContainer(
-                    closedBuilder: (context, openContainer) {
-                      return _buildSearchCard(
-                        leadingImageUrl: e.image?.url,
-                        title: e.username,
-                        onTap: openContainer,
-                      );
-                    },
-                    closedColor: ElevationOverlay.colorWithOverlay(
-                      Theme.of(context).colorScheme.surface,
-                      Colors.white,
-                      4,
+              _buildUserCards(userList),
+              if (userList.isEmpty)
+                Material(
+                  elevation: 4,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      children: [
+                        Text(
+                          "No users found",
+                          style: Theme.of(context).textTheme.headline6,
+                        ),
+                        Text(
+                          "Try searching for something else",
+                          style: Theme.of(context).textTheme.bodyText1,
+                        ),
+                      ],
                     ),
-                    closedElevation: 4,
-                    openElevation: 0,
-                    transitionDuration: const Duration(milliseconds: 500),
-                    transitionType: ContainerTransitionType.fadeThrough,
-                    openBuilder: (context, _) {
-                      return ProfileScreen(
-                        userId: e.id,
-                      );
-                    },
                   ),
-                );
-              }).toList(),
+                ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildUserCards(List<User> userList) {
+    return Column(
+      children: userList.map((e) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: OpenContainer(
+            closedBuilder: (context, openContainer) {
+              return _buildSearchCard(
+                leadingImageUrl: e.image?.url,
+                title: e.username,
+                onTap: openContainer,
+              );
+            },
+            closedColor: ElevationOverlay.colorWithOverlay(
+              Theme.of(context).colorScheme.surface,
+              Colors.white,
+              4,
+            ),
+            closedElevation: 4,
+            openElevation: 0,
+            transitionDuration: const Duration(milliseconds: 500),
+            transitionType: ContainerTransitionType.fadeThrough,
+            openBuilder: (context, _) {
+              return ProfileScreen(
+                userId: e.id,
+              );
+            },
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildRestaurantCards(
+    List<TransformedRestaurant> restaurantList,
+    User currentUser,
+    RestaurantProvider restaurantProvider,
+    String token,
+  ) {
+    return Column(
+      children: restaurantList.map(
+        (e) {
+          var isFavoritedByCurrentUser = e.usersWhoFavRestaurant.any(
+            (element) => element.id == currentUser.id,
+          );
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: OpenContainer(
+              closedBuilder: (context, openContainer) {
+                return _buildSearchCard(
+                  leadingImageUrl: e.restaurant.image!.url,
+                  title: e.restaurant.name,
+                  onTap: openContainer,
+                  trailing: ShaderMask(
+                    blendMode: BlendMode.srcIn,
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [lightOrange, mediumOrange],
+                    ).createShader(bounds),
+                    child: IconButton(
+                      splashRadius: 20,
+                      icon: Icon(
+                        isFavoritedByCurrentUser
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                      ),
+                      onPressed: () {
+                        restaurantProvider.toggleRestaurantFavorite(
+                          token,
+                          e.restaurant.id,
+                          currentUser,
+                          !isFavoritedByCurrentUser,
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
+              closedColor: ElevationOverlay.colorWithOverlay(
+                Theme.of(context).colorScheme.surface,
+                Colors.white,
+                4,
+              ),
+              closedElevation: 4,
+              openElevation: 0,
+              transitionDuration: const Duration(milliseconds: 500),
+              transitionType: ContainerTransitionType.fadeThrough,
+              openBuilder: (context, _) {
+                return RestaurantDetailsScreen(
+                  restaurantId: e.restaurant.id,
+                );
+              },
+            ),
+          );
+        },
+      ).toList(),
     );
   }
 
