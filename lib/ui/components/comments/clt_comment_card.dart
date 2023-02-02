@@ -1,6 +1,7 @@
 import 'package:clicktoeat/domain/comment/comment.dart';
 import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:clicktoeat/ui/components/typography/clt_heading.dart';
+import 'package:clicktoeat/ui/screens/profile/profile_screen.dart';
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -51,7 +52,11 @@ class CltCommentCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   InkWell(
-                    onTap: () {},//TODO: Navigate to user profile
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ProfileScreen(userId: comment.user.id),
+                      ),
+                    ),
                     splashFactory: InkRipple.splashFactory,
                     child: Row(
                       children: [

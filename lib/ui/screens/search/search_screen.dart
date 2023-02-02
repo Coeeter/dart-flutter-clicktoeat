@@ -29,12 +29,14 @@ class _SearchScreenState extends State<SearchScreen> {
               .contains(query.toLowerCase()),
         )
         .toList()
-      ..sort((a, b) => a.restaurant.name
-          .toLowerCase()
-          .indexOf(query.toLowerCase())
-          .compareTo(
-            b.restaurant.name.toLowerCase().indexOf(query.toLowerCase()),
-          ));
+      ..sort(
+        (a, b) => a.restaurant.name
+            .toLowerCase()
+            .indexOf(query.toLowerCase())
+            .compareTo(
+              b.restaurant.name.toLowerCase().indexOf(query.toLowerCase()),
+            ),
+      );
     var authProvider = Provider.of<AuthProvider>(context);
     var currentUser = authProvider.user!;
     var token = authProvider.token!;
