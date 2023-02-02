@@ -9,6 +9,7 @@ import 'package:clicktoeat/ui/components/comments/clt_create_comment.dart';
 import 'package:clicktoeat/ui/components/comments/clt_edit_comment_dialog.dart';
 import 'package:clicktoeat/ui/components/comments/clt_review_meta_data.dart';
 import 'package:clicktoeat/ui/components/typography/clt_heading.dart';
+import 'package:clicktoeat/ui/screens/restaurant/comments_screen.dart';
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -101,7 +102,14 @@ class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
                   ),
                   if (commentsOfRestaurant.isNotEmpty)
                     TextButton(
-                      onPressed: () {}, // TODO: Navigate to all reviews acreen
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CommentsScreen(
+                            restaurantId: widget.restaurantId,
+                          ),
+                        ),
+                      ),
                       child: const Text("See all"),
                     )
                 ],

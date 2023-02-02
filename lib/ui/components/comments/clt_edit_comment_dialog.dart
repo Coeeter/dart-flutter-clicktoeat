@@ -112,7 +112,7 @@ class _CltEditCommentDialogState extends State<CltEditCommentDialog> {
 
   @override
   Widget build(BuildContext context) {
-    var width = MediaQuery.of(context).size.width - 32;
+    var width = MediaQuery.of(context).size.width - 64;
 
     return Center(
       child: FittedBox(

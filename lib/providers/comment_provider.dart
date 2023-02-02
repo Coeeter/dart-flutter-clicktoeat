@@ -14,7 +14,10 @@ class CommentProvider extends ChangeNotifier {
 
   Future<void> getComments() async {
     try {
-      commentList = await _commentRepo.getAllComments();
+      commentList = await _commentRepo.getAllComments()
+        ..sort((a, b) {
+          return b.updatedAt.compareTo(a.updatedAt);
+        });
       notifyListeners();
     } on DefaultException catch (e) {
       ScaffoldMessenger.of(_context).showSnackBar(

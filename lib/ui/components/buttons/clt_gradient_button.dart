@@ -19,6 +19,10 @@ class CltGradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var disabledColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.grey[800]
+        : Colors.grey[300];
+
     return InkWell(
       onTap: isLoading ? null : onClick,
       borderRadius: const BorderRadius.all(
@@ -28,7 +32,7 @@ class CltGradientButton extends StatelessWidget {
       child: Ink(
         decoration: BoxDecoration(
           gradient: isLoading ? null : gradient,
-          color: isLoading ? Colors.grey[300] : null,
+          color: isLoading ? disabledColor : null,
           borderRadius: const BorderRadius.all(
             Radius.circular(10),
           ),
