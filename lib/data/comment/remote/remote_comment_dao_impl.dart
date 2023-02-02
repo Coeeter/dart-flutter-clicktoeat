@@ -105,7 +105,7 @@ class RemoteCommentDaoImpl extends NetworkUtils implements RemoteCommentDao {
       length += 1;
     }
     if (rating != null) {
-      requestBody["rating"] = rating;
+      requestBody["rating"] = rating.toString();
       length += 1;
     }
     if (length == 0) {

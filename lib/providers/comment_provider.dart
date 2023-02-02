@@ -23,6 +23,11 @@ class CommentProvider extends ChangeNotifier {
     }
   }
 
+  Future<Comment> getCommentById(String id) async {
+    var comment = await _commentRepo.getCommentById(id: id);
+    return comment;
+  }
+
   Future<void> createComment(
     String token,
     String restaurantId,
@@ -56,8 +61,10 @@ class CommentProvider extends ChangeNotifier {
       review: review,
       rating: rating,
     );
-    commentList = commentList
-      ..add(comment)
+    commentList = commentList.map((e) {
+      if (e.id != commentId) return e;
+      return comment;
+    }).toList()
       ..sort((a, b) {
         return b.updatedAt.compareTo(a.updatedAt);
       });
@@ -65,13 +72,20 @@ class CommentProvider extends ChangeNotifier {
   }
 
   Future<void> deleteComment(String token, String commentId) async {
-    await _commentRepo.deleteComment(
-      token: token,
-      commentId: commentId,
-    );
+    var oldCommentList = commentList;
     commentList = commentList.where((element) {
       return element.id != commentId;
     }).toList();
     notifyListeners();
+    try {
+      await _commentRepo.deleteComment(
+        token: token,
+        commentId: commentId,
+      );
+    } catch (e) {
+      commentList = oldCommentList;
+      notifyListeners();
+      rethrow;
+    }
   }
 }

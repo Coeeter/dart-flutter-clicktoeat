@@ -9,11 +9,15 @@ import 'package:provider/provider.dart';
 class CltCommentCard extends StatelessWidget {
   final Comment comment;
   final double width;
+  final void Function() editComment;
+  final void Function() deleteComment;
 
   const CltCommentCard({
     Key? key,
     required this.comment,
     required this.width,
+    required this.editComment,
+    required this.deleteComment,
   }) : super(key: key);
 
   @override
@@ -73,10 +77,24 @@ class CltCommentCard extends StatelessWidget {
                     ],
                   ),
                   if (shouldShowEditBtn)
-                    IconButton(
-                      onPressed: () {}, // TODO: Show edit and delete options
-                      splashRadius: 20,
+                    PopupMenuButton<String>(
                       icon: const Icon(Icons.more_vert),
+                      onSelected: (value) {
+                        if (value == "edit") {
+                          return editComment();
+                        }
+                        deleteComment();
+                      },
+                      itemBuilder: (_) => [
+                        const PopupMenuItem(
+                          child: Text("Edit Comment"),
+                          value: "edit",
+                        ),
+                        const PopupMenuItem(
+                          child: Text("Delete Comment"),
+                          value: "delete",
+                        ),
+                      ],
                     )
                 ],
               ),

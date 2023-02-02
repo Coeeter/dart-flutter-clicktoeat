@@ -23,11 +23,15 @@ class Comment {
   Comment.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     review = json['review'];
-    rating = json['rating'];
     createdAt = DateTime.parse(json['created_at']);
     updatedAt = DateTime.parse(json['updated_at']);
     user = User.fromJson(json['user']);
     restaurant = Restaurant.fromJson(json['restaurant']);
+    if (json['rating'] is int) {
+      rating = json['rating'];
+    } else {
+      rating = int.parse(json['rating']);
+    }
   }
 
   Map<String, dynamic> toJson() {
