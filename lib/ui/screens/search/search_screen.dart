@@ -1,8 +1,9 @@
 import 'package:animations/animations.dart';
-import 'package:clicktoeat/domain/user/user.dart';
 import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:clicktoeat/providers/restaurant_provider.dart';
+import 'package:clicktoeat/providers/user_provider.dart';
 import 'package:clicktoeat/ui/components/typography/clt_heading.dart';
+import 'package:clicktoeat/ui/screens/profile/profile_screen.dart';
 import 'package:clicktoeat/ui/screens/restaurant/restaurant_details_screen.dart';
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,10 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     var restaurantProvider = Provider.of<RestaurantProvider>(context);
+    var userProvider = Provider.of<UserProvider>(context);
+    var authProvider = Provider.of<AuthProvider>(context);
+    var currentUser = authProvider.user!;
+    var token = authProvider.token!;
     var restaurantList = restaurantProvider.restaurantList
         .where(
           (element) => element.restaurant.name
@@ -37,9 +42,16 @@ class _SearchScreenState extends State<SearchScreen> {
               b.restaurant.name.toLowerCase().indexOf(query.toLowerCase()),
             ),
       );
-    var authProvider = Provider.of<AuthProvider>(context);
-    var currentUser = authProvider.user!;
-    var token = authProvider.token!;
+    var userList = userProvider.users.where((element) {
+      return element.username.toLowerCase().contains(
+            query.toLowerCase(),
+          );
+    }).toList();
+    userList.sort((a, b) {
+      return a.username.toLowerCase().indexOf(query.toLowerCase()).compareTo(
+            b.username.toLowerCase().indexOf(query.toLowerCase()),
+          );
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -90,17 +102,40 @@ class _SearchScreenState extends State<SearchScreen> {
               const SizedBox(height: 10),
               ...restaurantList.map(
                 (e) {
+                  var isFavoritedByCurrentUser = e.usersWhoFavRestaurant.any(
+                    (element) => element.id == currentUser.id,
+                  );
+
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: OpenContainer(
                       closedBuilder: (context, openContainer) {
-                        return _buildRestaurantCard(
-                          context,
-                          e,
-                          restaurantProvider,
-                          token,
-                          currentUser,
-                          openContainer,
+                        return _buildSearchCard(
+                          leadingImageUrl: e.restaurant.image!.url,
+                          title: e.restaurant.name,
+                          onTap: openContainer,
+                          trailing: ShaderMask(
+                            blendMode: BlendMode.srcIn,
+                            shaderCallback: (bounds) => const LinearGradient(
+                              colors: [lightOrange, mediumOrange],
+                            ).createShader(bounds),
+                            child: IconButton(
+                              splashRadius: 20,
+                              icon: Icon(
+                                isFavoritedByCurrentUser
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                              ),
+                              onPressed: () {
+                                restaurantProvider.toggleRestaurantFavorite(
+                                  token,
+                                  e.restaurant.id,
+                                  currentUser,
+                                  !isFavoritedByCurrentUser,
+                                );
+                              },
+                            ),
+                          ),
                         );
                       },
                       closedColor: ElevationOverlay.colorWithOverlay(
@@ -120,7 +155,38 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   );
                 },
-              )
+              ),
+              const SizedBox(height: 10),
+              const CltHeading(text: "Users"),
+              const SizedBox(height: 10),
+              ...userList.map((e) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: OpenContainer(
+                    closedBuilder: (context, openContainer) {
+                      return _buildSearchCard(
+                        leadingImageUrl: e.image?.url,
+                        title: e.username,
+                        onTap: openContainer,
+                      );
+                    },
+                    closedColor: ElevationOverlay.colorWithOverlay(
+                      Theme.of(context).colorScheme.surface,
+                      Colors.white,
+                      4,
+                    ),
+                    closedElevation: 4,
+                    openElevation: 0,
+                    transitionDuration: const Duration(milliseconds: 500),
+                    transitionType: ContainerTransitionType.fadeThrough,
+                    openBuilder: (context, _) {
+                      return ProfileScreen(
+                        userId: e.id,
+                      );
+                    },
+                  ),
+                );
+              }).toList(),
             ],
           ),
         ),
@@ -128,27 +194,21 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildRestaurantCard(
-    BuildContext context,
-    TransformedRestaurant e,
-    RestaurantProvider restaurantProvider,
-    String token,
-    User currentUser,
-    void Function() navigateToRestaurantDetailsScreen,
-  ) {
-    var startQueryIndex =
-        e.restaurant.name.toLowerCase().indexOf(query.toLowerCase());
+  Widget _buildSearchCard({
+    required String? leadingImageUrl,
+    required String title,
+    Widget? trailing,
+    void Function()? onTap,
+  }) {
+    var startQueryIndex = title.toLowerCase().indexOf(query.toLowerCase());
     var endQueryIndex = startQueryIndex + query.length;
-    var isFavoritedByCurrentUser = e.usersWhoFavRestaurant.any(
-      (element) => element.id == currentUser.id,
-    );
 
     return InkWell(
-      onTap: navigateToRestaurantDetailsScreen,
+      onTap: onTap,
       child: ListTile(
         leading: Container(
-          width: 50,
-          height: 50,
+          width: 40,
+          height: 40,
           decoration: BoxDecoration(
             border: Border.all(
               color: mediumOrange,
@@ -156,12 +216,14 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             shape: BoxShape.circle,
           ),
-          child: ClipOval(
-            child: Image.network(
-              e.restaurant.image!.url,
-              fit: BoxFit.cover,
-            ),
-          ),
+          child: leadingImageUrl == null
+              ? const Icon(Icons.person)
+              : ClipOval(
+                  child: Image.network(
+                    leadingImageUrl,
+                    fit: BoxFit.cover,
+                  ),
+                ),
         ),
         title: RichText(
           text: TextSpan(
@@ -171,44 +233,25 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             children: [
               TextSpan(
-                text: e.restaurant.name.substring(
+                text: title.substring(
                   0,
                   startQueryIndex,
                 ),
               ),
               TextSpan(
-                text: e.restaurant.name.substring(
+                text: title.substring(
                   startQueryIndex,
                   endQueryIndex,
                 ),
                 style: const TextStyle(color: mediumOrange),
               ),
               TextSpan(
-                text: e.restaurant.name.substring(endQueryIndex),
+                text: title.substring(endQueryIndex),
               ),
             ],
           ),
         ),
-        trailing: ShaderMask(
-          blendMode: BlendMode.srcIn,
-          shaderCallback: (bounds) => const LinearGradient(
-            colors: [lightOrange, mediumOrange],
-          ).createShader(bounds),
-          child: IconButton(
-            splashRadius: 20,
-            icon: Icon(
-              isFavoritedByCurrentUser ? Icons.favorite : Icons.favorite_border,
-            ),
-            onPressed: () {
-              restaurantProvider.toggleRestaurantFavorite(
-                token,
-                e.restaurant.id,
-                currentUser,
-                !isFavoritedByCurrentUser,
-              );
-            },
-          ),
-        ),
+        trailing: trailing,
       ),
     );
   }

@@ -12,6 +12,7 @@ import 'package:clicktoeat/data/user/user_repo_impl.dart';
 import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:clicktoeat/providers/comment_provider.dart';
 import 'package:clicktoeat/providers/restaurant_provider.dart';
+import 'package:clicktoeat/providers/user_provider.dart';
 import 'package:clicktoeat/ui/clt_app.dart';
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/material.dart';
@@ -45,14 +46,18 @@ void main() async {
   var branchRepo = BranchRepoImpl(
     remoteBranchDao: RemoteBranchDaoImpl(),
   );
+  late AuthProvider authProvider;
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (context) => AuthProvider(
-            context,
-            userRepo,
-          ),
+          create: (context) {
+            authProvider = AuthProvider(
+              context,
+              userRepo,
+            );
+            return authProvider;
+          },
         ),
         ChangeNotifierProvider(
           create: (context) => RestaurantProvider(
@@ -68,6 +73,12 @@ void main() async {
             commentRepo,
           ),
         ),
+        ChangeNotifierProvider(
+          create: (context) => UserProvider(
+            authProvider,
+            userRepo,
+          ),
+        )
       ],
       child: const CltApp(),
     ),
