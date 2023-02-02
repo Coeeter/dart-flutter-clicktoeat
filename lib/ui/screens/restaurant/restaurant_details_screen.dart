@@ -55,68 +55,74 @@ class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
           ];
         },
         body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 10,
-          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildRestaurantReviewStats(
-                commentsOfRestaurant,
-                transformedRestaurant,
-              ),
-              const SizedBox(height: 10),
-              const CltHeading(
-                text: "Description",
-                textStyle: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
                 ),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                transformedRestaurant.restaurant.description,
-                style: const TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 10),
-              const CltHeading(
-                text: "Branches",
-                textStyle: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 5),
-              _buildMap(transformedRestaurant),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const CltHeading(
-                    text: "Reviews",
-                    textStyle: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildRestaurantReviewStats(
+                      commentsOfRestaurant,
+                      transformedRestaurant,
                     ),
-                  ),
-                  if (commentsOfRestaurant.isNotEmpty)
-                    TextButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => CommentsScreen(
-                            restaurantId: widget.restaurantId,
+                    const SizedBox(height: 10),
+                    const CltHeading(
+                      text: "Description",
+                      textStyle: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      transformedRestaurant.restaurant.description,
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(height: 10),
+                    const CltHeading(
+                      text: "Branches",
+                      textStyle: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    _buildMap(transformedRestaurant),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const CltHeading(
+                          text: "Reviews",
+                          textStyle: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
-                      child: const Text("See all"),
-                    )
-                ],
+                        if (commentsOfRestaurant.isNotEmpty)
+                          TextButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CommentsScreen(
+                                  restaurantId: widget.restaurantId,
+                                ),
+                              ),
+                            ),
+                            child: const Text("See all"),
+                          )
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    CltCreateCommentForm(restaurantId: widget.restaurantId),
+                    const SizedBox(height: 10),
+                  ],
+                ),
               ),
-              const SizedBox(height: 10),
-              CltCreateCommentForm(restaurantId: widget.restaurantId),
-              const SizedBox(height: 10),
               AnimatedCrossFade(
                 crossFadeState: commentsOfRestaurant.isNotEmpty
                     ? CrossFadeState.showFirst
@@ -126,8 +132,13 @@ class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
                 ),
                 firstChild: Column(
                   children: [
-                    CltReviewMetaData(
-                      commentsOfRestaurant: commentsOfRestaurant,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
+                      child: CltReviewMetaData(
+                        commentsOfRestaurant: commentsOfRestaurant,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     _buildLatestComments(
@@ -188,42 +199,48 @@ class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
   ) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: Row(
-        children: List.generate(
-          min(3, commentsOfRestaurant.length),
-          (index) {
-            var isOnlyOneLong = commentsOfRestaurant.length == 1;
-            var isLastItem =
-                index == 2 || index == commentsOfRestaurant.length - 1;
-            return Row(
-              children: [
-                CltCommentCard(
-                  comment: commentsOfRestaurant[index],
-                  width: commentsOfRestaurant.length == 1
-                      ? MediaQuery.of(context).size.width - 32
-                      : MediaQuery.of(context).size.width - 56,
-                  editComment: () {
-                    showDialog(
-                      context: context,
-                      builder: (_) => CltEditCommentDialog(
-                        comment: commentsOfRestaurant[index],
-                      ),
-                    );
-                  },
-                  deleteComment: () {
-                    commentProvider.deleteComment(
-                      token,
-                      commentsOfRestaurant[index].id,
-                    );
-                  },
-                ),
-                SizedBox(
-                  width: isOnlyOneLong || isLastItem ? 0 : 12,
-                ),
-              ],
-            );
-          },
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          Row(
+            children: List.generate(
+              min(3, commentsOfRestaurant.length),
+              (index) {
+                var isOnlyOneLong = commentsOfRestaurant.length == 1;
+                var isLastItem =
+                    index == 2 || index == commentsOfRestaurant.length - 1;
+                return Row(
+                  children: [
+                    CltCommentCard(
+                      comment: commentsOfRestaurant[index],
+                      width: commentsOfRestaurant.length == 1
+                          ? MediaQuery.of(context).size.width - 32
+                          : MediaQuery.of(context).size.width - 56,
+                      editComment: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => CltEditCommentDialog(
+                            comment: commentsOfRestaurant[index],
+                          ),
+                        );
+                      },
+                      deleteComment: () {
+                        commentProvider.deleteComment(
+                          token,
+                          commentsOfRestaurant[index].id,
+                        );
+                      },
+                    ),
+                    SizedBox(
+                      width: isOnlyOneLong || isLastItem ? 0 : 12,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 10)
+        ],
       ),
     );
   }
