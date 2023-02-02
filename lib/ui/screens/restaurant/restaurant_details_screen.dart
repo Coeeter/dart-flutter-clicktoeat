@@ -8,6 +8,7 @@ import 'package:clicktoeat/providers/comment_provider.dart';
 import 'package:clicktoeat/providers/restaurant_provider.dart';
 import 'package:clicktoeat/ui/components/buttons/clt_gradient_button.dart';
 import 'package:clicktoeat/ui/components/clt_comment_card.dart';
+import 'package:clicktoeat/ui/components/clt_review_meta_data.dart';
 import 'package:clicktoeat/ui/components/typography/clt_heading.dart';
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/foundation.dart';
@@ -54,94 +55,106 @@ class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
           ];
         },
         body: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 10,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildRestaurantReviewStats(
-                  commentsOfRestaurant,
-                  transformedRestaurant,
-                ),
-                const SizedBox(height: 10),
-                const CltHeading(
-                  text: "Description",
-                  textStyle: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  transformedRestaurant.restaurant.description,
-                  style: const TextStyle(fontSize: 18),
-                ),
-                const SizedBox(height: 10),
-                const CltHeading(
-                  text: "Branches",
-                  textStyle: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                _buildMap(transformedRestaurant),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const CltHeading(
-                      text: "Reviews",
-                      textStyle: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (commentsOfRestaurant.isNotEmpty)
-                      TextButton(
-                        onPressed:
-                            () {}, // TODO: Navigate to all reviews acreen
-                        child: const Text("See all"),
-                      )
-                  ],
-                ),
-                const SizedBox(height: 10),
-                ReviewForm(restaurantId: widget.restaurantId),
-                const SizedBox(height: 10),
-                if (commentsOfRestaurant.isNotEmpty)
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: List.generate(
-                        min(3, commentsOfRestaurant.length),
-                        (index) {
-                          return Row(
-                            children: [
-                              CltCommentCard(
-                                comment: commentsOfRestaurant[index],
-                                width: commentsOfRestaurant.length == 1
-                                    ? MediaQuery.of(context).size.width - 32
-                                    : MediaQuery.of(context).size.width - 56,
-                              ),
-                              SizedBox(
-                                width: commentsOfRestaurant.length == 1 ||
-                                        index == 2 ||
-                                        index == commentsOfRestaurant.length - 1
-                                    ? 0
-                                    : 12,
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 10,
           ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildRestaurantReviewStats(
+                commentsOfRestaurant,
+                transformedRestaurant,
+              ),
+              const SizedBox(height: 10),
+              const CltHeading(
+                text: "Description",
+                textStyle: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                transformedRestaurant.restaurant.description,
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 10),
+              const CltHeading(
+                text: "Branches",
+                textStyle: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 5),
+              _buildMap(transformedRestaurant),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const CltHeading(
+                    text: "Reviews",
+                    textStyle: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (commentsOfRestaurant.isNotEmpty)
+                    TextButton(
+                      onPressed: () {}, // TODO: Navigate to all reviews acreen
+                      child: const Text("See all"),
+                    )
+                ],
+              ),
+              const SizedBox(height: 10),
+              ReviewForm(restaurantId: widget.restaurantId),
+              const SizedBox(height: 10),
+              if (commentsOfRestaurant.isNotEmpty)
+                Column(
+                  children: [
+                    CltReviewMetaData(
+                      commentsOfRestaurant: commentsOfRestaurant,
+                    ),
+                    const SizedBox(height: 10),
+                    _buildLatestComments(commentsOfRestaurant, context),
+                  ],
+                )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  SingleChildScrollView _buildLatestComments(
+    List<Comment> commentsOfRestaurant,
+    BuildContext context,
+  ) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: List.generate(
+          min(3, commentsOfRestaurant.length),
+          (index) {
+            return Row(
+              children: [
+                CltCommentCard(
+                  comment: commentsOfRestaurant[index],
+                  width: commentsOfRestaurant.length == 1
+                      ? MediaQuery.of(context).size.width - 32
+                      : MediaQuery.of(context).size.width - 56,
+                ),
+                SizedBox(
+                  width: commentsOfRestaurant.length == 1 ||
+                          index == 2 ||
+                          index == commentsOfRestaurant.length - 1
+                      ? 0
+                      : 12,
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -429,7 +442,7 @@ class _ReviewFormState extends State<ReviewForm> {
               });
             },
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 15),
           Row(
             children: [
               ShaderMask(
