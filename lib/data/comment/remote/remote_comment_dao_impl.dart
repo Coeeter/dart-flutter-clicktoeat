@@ -22,7 +22,7 @@ class RemoteCommentDaoImpl extends NetworkUtils implements RemoteCommentDao {
       headers: createAuthorizationHeader(token),
       body: {
         "review": review,
-        "rating": rating,
+        "rating": rating.toString(),
       },
     );
     var body = jsonDecode(response.body);
