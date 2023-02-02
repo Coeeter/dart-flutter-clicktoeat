@@ -3,7 +3,7 @@ import 'package:clicktoeat/data/exceptions/field_exception.dart';
 import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:clicktoeat/ui/components/buttons/clt_gradient_button.dart';
 import 'package:clicktoeat/ui/components/typography/clt_heading.dart';
-import 'package:clicktoeat/ui/screens/restaurant/home_screen.dart';
+import 'package:clicktoeat/ui/screens/main_screen.dart';
 import 'package:clicktoeat/ui/utils/regex_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -63,7 +63,7 @@ class _LoginFormState extends State<LoginForm> {
     }
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => const HomeScreen(),
+        builder: (_) => const MainScreen(),
       ),
     );
   }

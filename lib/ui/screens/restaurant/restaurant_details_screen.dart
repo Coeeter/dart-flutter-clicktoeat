@@ -180,6 +180,7 @@ class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
                           fontSize: 18,
                         ),
                       ),
+                      const SizedBox(height: 10)
                     ],
                   ),
                 ),

@@ -50,31 +50,35 @@ class CltCommentCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: mediumOrange,
-                            width: 2,
+                  InkWell(
+                    onTap: () {},//TODO: Navigate to user profile
+                    splashFactory: InkRipple.splashFactory,
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: mediumOrange,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(100),
                           ),
-                          borderRadius: BorderRadius.circular(100),
-                        ),
-                        child: ClipOval(
-                          child: Image.network(
-                            comment.user.image!.url,
-                            fit: BoxFit.cover,
+                          child: ClipOval(
+                            child: Image.network(
+                              comment.user.image!.url,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 5),
-                      CltHeading(
-                        text: comment.user.username,
-                        textStyle: const TextStyle(fontSize: 20),
-                      ),
-                    ],
+                        const SizedBox(width: 5),
+                        CltHeading(
+                          text: comment.user.username,
+                          textStyle: const TextStyle(fontSize: 20),
+                        ),
+                      ],
+                    ),
                   ),
                   if (shouldShowEditBtn)
                     PopupMenuButton<String>(
