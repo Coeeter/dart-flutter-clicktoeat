@@ -141,6 +141,32 @@ class ProfileScreen extends StatelessWidget {
             ],
           ),
         ),
+        if (chunkedFavoriteRestaurants.isEmpty)
+          SizedBox(
+            width: double.infinity,
+            child: Column(
+              children: [
+                ShaderMask(
+                  blendMode: BlendMode.srcIn,
+                  shaderCallback: (bounds) => const LinearGradient(
+                    colors: [lightOrange, mediumOrange],
+                  ).createShader(bounds),
+                  child: const Icon(
+                    Icons.heart_broken,
+                    size: 150,
+                  ),
+                ),
+                const Text(
+                  "No favorites yet",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          )
       ],
     );
   }
@@ -166,21 +192,29 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         if (commentsOfUser.isEmpty)
-          Material(
-            elevation: 4,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(10),
-              ),
-            ),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              child: const Text(
-                "No reviews yet",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18),
-              ),
+          SizedBox(
+            width: double.infinity,
+            child: Column(
+              children: [
+                ShaderMask(
+                  blendMode: BlendMode.srcIn,
+                  shaderCallback: (bounds) => const LinearGradient(
+                    colors: [lightOrange, mediumOrange],
+                  ).createShader(bounds),
+                  child: const Icon(
+                    Icons.message,
+                    size: 150,
+                  ),
+                ),
+                const Text(
+                  "No reviews yet",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           )
       ],
@@ -294,43 +328,44 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ),
               ),
-              Positioned(
-                bottom: 5,
-                right: 5,
-                child: Material(
-                  elevation: 4,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? ElevationOverlay.colorWithOverlay(
-                          Theme.of(context).colorScheme.surface,
-                          Colors.white,
-                          50,
-                        )
-                      : Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  clipBehavior: Clip.hardEdge,
-                  child: InkWell(
-                    onTap: () {}, // TODO: Update profile picture
-                    child: Container(
-                      padding: const EdgeInsets.all(3),
-                      child: ShaderMask(
-                        blendMode: BlendMode.srcIn,
-                        shaderCallback: (rect) {
-                          return const LinearGradient(
-                            colors: [lightOrange, mediumOrange],
-                          ).createShader(
-                            Rect.fromLTWH(0, 0, rect.width, rect.height),
-                          );
-                        },
-                        child: const Icon(
-                          Icons.camera_alt,
+              if (currentUser != null && currentUser.id == user.id)
+                Positioned(
+                  bottom: 5,
+                  right: 5,
+                  child: Material(
+                    elevation: 4,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? ElevationOverlay.colorWithOverlay(
+                            Theme.of(context).colorScheme.surface,
+                            Colors.white,
+                            50,
+                          )
+                        : Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    clipBehavior: Clip.hardEdge,
+                    child: InkWell(
+                      onTap: () {}, // TODO: Update profile picture
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        child: ShaderMask(
+                          blendMode: BlendMode.srcIn,
+                          shaderCallback: (rect) {
+                            return const LinearGradient(
+                              colors: [lightOrange, mediumOrange],
+                            ).createShader(
+                              Rect.fromLTWH(0, 0, rect.width, rect.height),
+                            );
+                          },
+                          child: const Icon(
+                            Icons.camera_alt,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              )
+                )
             ],
           ),
         ),
