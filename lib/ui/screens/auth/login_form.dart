@@ -3,6 +3,7 @@ import 'package:clicktoeat/data/exceptions/field_exception.dart';
 import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:clicktoeat/ui/components/buttons/clt_gradient_button.dart';
 import 'package:clicktoeat/ui/components/typography/clt_heading.dart';
+import 'package:clicktoeat/ui/screens/auth/forget_password_screen.dart';
 import 'package:clicktoeat/ui/screens/main_screen.dart';
 import 'package:clicktoeat/ui/utils/regex_constants.dart';
 import 'package:flutter/material.dart';
@@ -154,7 +155,11 @@ class _LoginFormState extends State<LoginForm> {
                 width: double.infinity,
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {}, //TODO: navigate to forget password screen
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const ForgetPasswordScreen(),
+                    ),
+                  ),
                   child: const Text("Forgot password?"),
                 ),
               ),
