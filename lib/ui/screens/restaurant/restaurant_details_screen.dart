@@ -284,8 +284,10 @@ class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
     );
   }
 
-  Material _buildRestaurantReviewStats(List<Comment> commentsOfRestaurant,
-      TransformedRestaurant transformedRestaurant) {
+  Material _buildRestaurantReviewStats(
+    List<Comment> commentsOfRestaurant,
+    TransformedRestaurant transformedRestaurant,
+  ) {
     return Material(
       elevation: 4,
       shape: const RoundedRectangleBorder(

@@ -2,16 +2,23 @@ import 'package:clicktoeat/domain/comment/comment.dart';
 import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:clicktoeat/ui/components/typography/clt_heading.dart';
 import 'package:clicktoeat/ui/screens/profile/profile_screen.dart';
+import 'package:clicktoeat/ui/screens/restaurant/restaurant_details_screen.dart';
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
+enum CommentMode {
+  profile,
+  restaurant,
+}
 
 class CltCommentCard extends StatelessWidget {
   final Comment comment;
   final double width;
   final void Function() editComment;
   final void Function() deleteComment;
+  final CommentMode commentMode;
 
   const CltCommentCard({
     Key? key,
@@ -19,6 +26,7 @@ class CltCommentCard extends StatelessWidget {
     required this.width,
     required this.editComment,
     required this.deleteComment,
+    this.commentMode = CommentMode.profile,
   }) : super(key: key);
 
   @override
@@ -54,7 +62,11 @@ class CltCommentCard extends StatelessWidget {
                   InkWell(
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => ProfileScreen(user: comment.user),
+                        builder: (_) => commentMode == CommentMode.profile
+                            ? ProfileScreen(user: comment.user)
+                            : RestaurantDetailsScreen(
+                                restaurantId: comment.restaurant.id,
+                              ),
                       ),
                     ),
                     splashFactory: InkRipple.splashFactory,
@@ -71,21 +83,22 @@ class CltCommentCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(100),
                           ),
                           child: ClipOval(
-                            child: Image.network(
-                              comment.user.image!.url,
-                              fit: BoxFit.cover,
-                            ),
+                            child: commentMode == CommentMode.profile
+                                ? _buildUserImage()
+                                : Image.network(comment.restaurant.image!.url),
                           ),
                         ),
                         const SizedBox(width: 5),
                         CltHeading(
-                          text: comment.user.username,
+                          text: commentMode == CommentMode.profile
+                              ? comment.user.username
+                              : comment.restaurant.name,
                           textStyle: const TextStyle(fontSize: 20),
                         ),
                       ],
                     ),
                   ),
-                  if (shouldShowEditBtn)
+                  if (shouldShowEditBtn && commentMode == CommentMode.profile)
                     PopupMenuButton<String>(
                       icon: const Icon(Icons.more_vert),
                       onSelected: (value) {
@@ -161,5 +174,14 @@ class CltCommentCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildUserImage() {
+    return comment.user.image == null
+        ? const Icon(Icons.person)
+        : Image.network(
+            comment.user.image!.url,
+            fit: BoxFit.cover,
+          );
   }
 }

@@ -250,7 +250,7 @@ class FeaturedRestaurantSection extends StatelessWidget {
         itemBuilder: (context, index) {
           return SizedBox(
             width: MediaQuery.of(context).size.width / 2,
-            child: RestaurantCard(
+            child: CltRestaurantCard(
               toggleFavorite: (toAddToFav, restaurantId) {
                 restaurantProvider.toggleRestaurantFavorite(
                   authProvider.token!,
@@ -312,7 +312,7 @@ class FavoriteRestaurantsSection extends StatelessWidget {
               itemBuilder: (context, index) {
                 return SizedBox(
                   width: MediaQuery.of(context).size.width / 2,
-                  child: RestaurantCard(
+                  child: CltRestaurantCard(
                     toggleFavorite: (toAddToFav, restaurantId) {
                       restaurantProvider.toggleRestaurantFavorite(
                         authProvider.token!,
@@ -402,13 +402,9 @@ class AllRestaurantsSection extends StatelessWidget {
     List<List<TransformedRestaurant>> restaurantList = [];
 
     for (var i = 0; i < restaurantProvider.restaurantList.length; i += 2) {
-      var items = [restaurantProvider.restaurantList[i]];
-      if (i + 1 == restaurantProvider.restaurantList.length) {
-        restaurantList.add(items);
-        break;
-      }
-      items.add(restaurantProvider.restaurantList[i + 1]);
-      restaurantList.add(items);
+      restaurantList.add(
+        restaurantProvider.restaurantList.skip(i).take(2).toList(),
+      );
     }
 
     return ListView.builder(
@@ -420,7 +416,7 @@ class AllRestaurantsSection extends StatelessWidget {
             ...restaurantList[index]
                 .map(
                   (e) => Expanded(
-                    child: RestaurantCard(
+                    child: CltRestaurantCard(
                       toggleFavorite: (toAddToFav, restaurantId) {
                         restaurantProvider.toggleRestaurantFavorite(
                           authProvider.token!,

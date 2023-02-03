@@ -6,7 +6,7 @@ import 'package:clicktoeat/ui/screens/restaurant/restaurant_details_screen.dart'
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/material.dart';
 
-class RestaurantCard extends StatelessWidget {
+class CltRestaurantCard extends StatelessWidget {
   final TransformedRestaurant transformedRestaurant;
   final List<Comment> commentsOfRestaurant;
   final User? currentUser;
@@ -15,7 +15,7 @@ class RestaurantCard extends StatelessWidget {
     String restaurantId,
   ) toggleFavorite;
 
-  const RestaurantCard({
+  const CltRestaurantCard({
     Key? key,
     required this.transformedRestaurant,
     required this.commentsOfRestaurant,
