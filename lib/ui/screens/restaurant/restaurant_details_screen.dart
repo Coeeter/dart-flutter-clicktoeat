@@ -9,6 +9,7 @@ import 'package:clicktoeat/ui/components/comments/clt_create_comment.dart';
 import 'package:clicktoeat/ui/components/comments/clt_edit_comment_dialog.dart';
 import 'package:clicktoeat/ui/components/comments/clt_review_meta_data.dart';
 import 'package:clicktoeat/ui/components/typography/clt_heading.dart';
+import 'package:clicktoeat/ui/screens/main_screen.dart';
 import 'package:clicktoeat/ui/screens/restaurant/add_branch_screen.dart';
 import 'package:clicktoeat/ui/screens/restaurant/add_update_restaurant_screen.dart';
 import 'package:clicktoeat/ui/screens/restaurant/comments_screen.dart';
@@ -47,44 +48,11 @@ class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
         .toList();
 
     return Scaffold(
-      floatingActionButton: SpeedDial(
-        icon: Icons.edit,
-        activeIcon: Icons.close,
-        backgroundColor: mediumOrange,
-        iconTheme: const IconThemeData(color: Colors.white),
-        children: [
-          SpeedDialChild(
-            child: const Icon(Icons.delete),
-            label: "Delete Restaurant",
-            backgroundColor: Colors.red,
-            onTap: () {},
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.restaurant),
-            label: "Edit Restaurant",
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => AddUpdateRestaurantForm(
-                  navigateBack: () => Navigator.of(context).pop(),
-                  navigateToNextStage: (_) => Navigator.of(context).pop(),
-                  restaurant: transformedRestaurant.restaurant,
-                ),
-              ),
-            ),
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.add_location),
-            label: "Add Branch",
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => AddBranchScreen(
-                  restaurantId: widget.restaurantId,
-                  navigateBack: Navigator.of(context).pop,
-                ),
-              ),
-            ),
-          ),
-        ],
+      floatingActionButton: _buildSpeedDial(
+        context,
+        restaurantProvider,
+        authProvider,
+        transformedRestaurant,
       ),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
@@ -231,6 +199,82 @@ class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  SpeedDial _buildSpeedDial(
+    BuildContext context,
+    RestaurantProvider restaurantProvider,
+    AuthProvider authProvider,
+    TransformedRestaurant transformedRestaurant,
+  ) {
+    return SpeedDial(
+      icon: Icons.edit,
+      activeIcon: Icons.close,
+      backgroundColor: mediumOrange,
+      iconTheme: const IconThemeData(color: Colors.white),
+      children: [
+        SpeedDialChild(
+          child: const Icon(Icons.delete),
+          label: "Delete Restaurant",
+          backgroundColor: Colors.red,
+          onTap: () => showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              title: const Text("Delete Restaurant"),
+              content: const Text(
+                "Are you sure you want to delete this restaurant? This action cannot be undone.",
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    restaurantProvider.deleteRestaurant(
+                      authProvider.token!,
+                      widget.restaurantId,
+                    );
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (_) => const MainScreen(),
+                      ),
+                      (_) => false,
+                    );
+                  },
+                  child: const Text("Delete"),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SpeedDialChild(
+          child: const Icon(Icons.restaurant),
+          label: "Edit Restaurant",
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => AddUpdateRestaurantForm(
+                navigateBack: () => Navigator.of(context).pop(),
+                navigateToNextStage: (_) => Navigator.of(context).pop(),
+                restaurant: transformedRestaurant.restaurant,
+              ),
+            ),
+          ),
+        ),
+        SpeedDialChild(
+          child: const Icon(Icons.add_location),
+          label: "Add Branch",
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => AddBranchScreen(
+                restaurantId: widget.restaurantId,
+                navigateBack: Navigator.of(context).pop,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

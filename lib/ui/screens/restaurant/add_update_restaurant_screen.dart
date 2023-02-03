@@ -163,11 +163,11 @@ class _AddUpdateRestaurantFormState extends State<AddUpdateRestaurantForm> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      _isLoading = true;
-    });
     WidgetsBinding.instance?.addPostFrameCallback((_) async {
       if (widget.restaurant == null) return;
+      setState(() {
+        _isLoading = true;
+      });
       setState(() {
         _name = widget.restaurant!.name;
         _description = widget.restaurant!.description;
