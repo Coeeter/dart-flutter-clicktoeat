@@ -9,11 +9,14 @@ import 'package:clicktoeat/ui/components/comments/clt_create_comment.dart';
 import 'package:clicktoeat/ui/components/comments/clt_edit_comment_dialog.dart';
 import 'package:clicktoeat/ui/components/comments/clt_review_meta_data.dart';
 import 'package:clicktoeat/ui/components/typography/clt_heading.dart';
+import 'package:clicktoeat/ui/screens/restaurant/add_branch_screen.dart';
+import 'package:clicktoeat/ui/screens/restaurant/add_update_restaurant_screen.dart';
 import 'package:clicktoeat/ui/screens/restaurant/comments_screen.dart';
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -44,6 +47,45 @@ class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
         .toList();
 
     return Scaffold(
+      floatingActionButton: SpeedDial(
+        icon: Icons.edit,
+        activeIcon: Icons.close,
+        backgroundColor: mediumOrange,
+        iconTheme: const IconThemeData(color: Colors.white),
+        children: [
+          SpeedDialChild(
+            child: const Icon(Icons.delete),
+            label: "Delete Restaurant",
+            backgroundColor: Colors.red,
+            onTap: () {},
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.restaurant),
+            label: "Edit Restaurant",
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => AddUpdateRestaurantForm(
+                  navigateBack: () => Navigator.of(context).pop(),
+                  navigateToNextStage: (_) => Navigator.of(context).pop(),
+                  restaurant: transformedRestaurant.restaurant,
+                ),
+              ),
+            ),
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.add_location),
+            label: "Add Branch",
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => AddBranchScreen(
+                  restaurantId: widget.restaurantId,
+                  navigateBack: Navigator.of(context).pop,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [

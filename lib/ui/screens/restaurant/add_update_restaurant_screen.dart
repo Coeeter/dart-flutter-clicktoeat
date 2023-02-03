@@ -3,17 +3,22 @@ import 'dart:io';
 import 'package:animations/animations.dart';
 import 'package:clicktoeat/data/exceptions/default_exception.dart';
 import 'package:clicktoeat/data/exceptions/field_exception.dart';
+import 'package:clicktoeat/domain/restaurant/restaurant.dart';
 import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:clicktoeat/providers/restaurant_provider.dart';
 import 'package:clicktoeat/ui/components/buttons/clt_gradient_button.dart';
 import 'package:clicktoeat/ui/screens/restaurant/add_branch_screen.dart';
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class AddRestaurantScreen extends StatefulWidget {
   final void Function() navigateBack;
+
   const AddRestaurantScreen({
     Key? key,
     required this.navigateBack,
@@ -39,7 +44,7 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
         );
       },
       child: createdRestaurantId == null
-          ? AddRestaurantForm(
+          ? AddUpdateRestaurantForm(
               key: const ValueKey(0),
               navigateBack: widget.navigateBack,
               navigateToNextStage: (restaurantId) => setState(() {
@@ -55,21 +60,24 @@ class _AddRestaurantScreenState extends State<AddRestaurantScreen> {
   }
 }
 
-class AddRestaurantForm extends StatefulWidget {
+class AddUpdateRestaurantForm extends StatefulWidget {
   final void Function() navigateBack;
   final void Function(String restaurantId) navigateToNextStage;
+  final Restaurant? restaurant;
 
-  const AddRestaurantForm({
+  const AddUpdateRestaurantForm({
     Key? key,
     required this.navigateBack,
     required this.navigateToNextStage,
+    this.restaurant,
   }) : super(key: key);
 
   @override
-  State<AddRestaurantForm> createState() => _AddRestaurantFormState();
+  State<AddUpdateRestaurantForm> createState() =>
+      _AddUpdateRestaurantFormState();
 }
 
-class _AddRestaurantFormState extends State<AddRestaurantForm> {
+class _AddUpdateRestaurantFormState extends State<AddUpdateRestaurantForm> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   File? _image;
   String? _imageError;
@@ -77,6 +85,7 @@ class _AddRestaurantFormState extends State<AddRestaurantForm> {
   String? _nameError;
   String? _descriptionError;
   String _description = "";
+  bool _isSubmitting = false;
   bool _isLoading = false;
 
   bool _isImageValid() {
@@ -94,7 +103,7 @@ class _AddRestaurantFormState extends State<AddRestaurantForm> {
     if (!isTextFieldsValid || !isImageValid) return;
     _formKey.currentState?.save();
     setState(() {
-      _isLoading = true;
+      _isSubmitting = true;
     });
     String insertId;
     try {
@@ -107,12 +116,23 @@ class _AddRestaurantFormState extends State<AddRestaurantForm> {
         listen: false,
       );
       await authProvider.getToken();
-      insertId = await restaurantProvider.createRestaurant(
-        authProvider.token!,
-        _name,
-        _description,
-        _image!,
-      );
+      if (widget.restaurant == null) {
+        insertId = await restaurantProvider.createRestaurant(
+          authProvider.token!,
+          _name,
+          _description,
+          _image!,
+        );
+      } else {
+        insertId = "";
+        await restaurantProvider.updateRestaurant(
+          authProvider.token!,
+          widget.restaurant!.id,
+          _name,
+          _description,
+          _image!,
+        );
+      }
     } on FieldException catch (e) {
       var nameError = e.fieldErrors.where((element) {
         return element.field == "name";
@@ -121,7 +141,7 @@ class _AddRestaurantFormState extends State<AddRestaurantForm> {
         return element.field == "description";
       }).toList();
       return setState(() {
-        _isLoading = false;
+        _isSubmitting = false;
         if (nameError.length == 1) {
           _nameError = nameError[0].error;
         }
@@ -134,104 +154,141 @@ class _AddRestaurantFormState extends State<AddRestaurantForm> {
         SnackBar(content: Text(e.error)),
       );
       return setState(() {
-        _isLoading = false;
+        _isSubmitting = false;
       });
     }
     widget.navigateToNextStage(insertId);
   }
 
   @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _isLoading = true;
+    });
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+      if (widget.restaurant == null) return;
+      setState(() {
+        _name = widget.restaurant!.name;
+        _description = widget.restaurant!.description;
+      });
+      var uri = Uri.parse(widget.restaurant!.image!.url);
+      var responseData = await get(uri);
+      var uint8list = responseData.bodyBytes;
+      var buffer = uint8list.buffer;
+      var byteData = ByteData.view(buffer);
+      var tempDir = await getTemporaryDirectory();
+      var file = await File('${tempDir.path}/img').writeAsBytes(
+        buffer.asUint8List(
+          byteData.offsetInBytes,
+          byteData.lengthInBytes,
+        ),
+      );
+      setState(() {
+        _image = file;
+        _isLoading = false;
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add Restaurant"),
+        title: Text(
+          widget.restaurant == null ? "Add Restaurant" : "Update Restaurant",
+        ),
         leading: IconButton(
           onPressed: widget.navigateBack,
           splashRadius: 20,
           icon: const Icon(Icons.arrow_back),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _imagePicker(),
-              const SizedBox(height: 10),
-              Material(
-                elevation: 4,
-                child: Container(
-                  padding: const EdgeInsets.all(15),
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        decoration: InputDecoration(
-                          border: const OutlineInputBorder(),
-                          label: const Text("Name"),
-                          errorText: _nameError,
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _imagePicker(),
+                    const SizedBox(height: 10),
+                    Material(
+                      elevation: 4,
+                      child: Container(
+                        padding: const EdgeInsets.all(15),
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              initialValue: widget.restaurant?.name,
+                              decoration: InputDecoration(
+                                border: const OutlineInputBorder(),
+                                label: const Text("Name"),
+                                errorText: _nameError,
+                              ),
+                              textInputAction: TextInputAction.next,
+                              onChanged: (_) {
+                                if (_nameError == null) return;
+                                setState(() {
+                                  _nameError = null;
+                                });
+                              },
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Name required!";
+                                }
+                                return null;
+                              },
+                              onSaved: (value) {
+                                setState(() {
+                                  _name = value!;
+                                });
+                              },
+                            ),
+                            const SizedBox(height: 15),
+                            TextFormField(
+                              initialValue: widget.restaurant?.description,
+                              decoration: InputDecoration(
+                                border: const OutlineInputBorder(),
+                                label: const Text("Description"),
+                                errorText: _descriptionError,
+                              ),
+                              minLines: 3,
+                              maxLines: 10,
+                              onChanged: (_) {
+                                if (_descriptionError == null) return;
+                                setState(() {
+                                  _descriptionError = null;
+                                });
+                              },
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Description required!";
+                                }
+                                return null;
+                              },
+                              onSaved: (value) {
+                                setState(() {
+                                  _description = value!;
+                                });
+                              },
+                            ),
+                            const SizedBox(height: 25),
+                            CltGradientButton(
+                              onClick: submit,
+                              text: "Submit",
+                              isLoading: _isSubmitting,
+                            )
+                          ],
                         ),
-                        textInputAction: TextInputAction.next,
-                        onChanged: (_) {
-                          if (_nameError == null) return;
-                          setState(() {
-                            _nameError = null;
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Name required!";
-                          }
-                          return null;
-                        },
-                        onSaved: (value) {
-                          setState(() {
-                            _name = value!;
-                          });
-                        },
                       ),
-                      const SizedBox(height: 15),
-                      TextFormField(
-                        decoration: InputDecoration(
-                          border: const OutlineInputBorder(),
-                          label: const Text("Description"),
-                          errorText: _descriptionError,
-                        ),
-                        minLines: 3,
-                        maxLines: 10,
-                        onChanged: (_) {
-                          if (_descriptionError == null) return;
-                          setState(() {
-                            _descriptionError = null;
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Description required!";
-                          }
-                          return null;
-                        },
-                        onSaved: (value) {
-                          setState(() {
-                            _description = value!;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 25),
-                      CltGradientButton(
-                        onClick: submit,
-                        text: "Submit",
-                        isLoading: _isLoading,
-                      )
-                    ],
-                  ),
+                    )
+                  ],
                 ),
-              )
-            ],
-          ),
-        ),
-      ),
+              ),
+            ),
     );
   }
 

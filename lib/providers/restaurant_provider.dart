@@ -165,28 +165,26 @@ class RestaurantProvider extends ChangeNotifier {
     String description,
     File image,
   ) async {
-    var restaurant = await _restaurantRepo.updateRestaurant(
+    await _restaurantRepo.updateRestaurant(
       restaurantId: restaurantId,
       name: name,
       description: description,
       image: image,
       token: token,
     );
+    var restaurant = await _restaurantRepo.getRestaurantById(
+      restaurantId: restaurantId,
+    );
     var favorites = await _favoriteRepo.getFavsOfRestaurant(
       restaurantId: restaurantId,
     );
-    restaurantList = restaurantList
-      ..add(
-        TransformedRestaurant(
-          restaurant: restaurant,
-          usersWhoFavRestaurant: favorites,
-        ),
-      )
-      ..sort((a, b) {
-        return a.restaurant.name
-            .toLowerCase()
-            .compareTo(b.restaurant.name.toLowerCase());
-      });
+    restaurantList = restaurantList.map((e) {
+      if (e.restaurant.id != restaurantId) return e;
+      return TransformedRestaurant(
+        restaurant: restaurant,
+        usersWhoFavRestaurant: favorites,
+      );
+    }).toList();
     notifyListeners();
   }
 

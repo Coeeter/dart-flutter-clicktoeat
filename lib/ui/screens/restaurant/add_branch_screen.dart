@@ -42,6 +42,7 @@ class _AddBranchScreenState extends State<AddBranchScreen> {
     var isFormValid = _formKey.currentState?.validate() == true;
     var isLatLngValid = _isLatLngValid();
     if (!isFormValid || !isLatLngValid) return;
+    _formKey.currentState?.save();
     setState(() {
       _isLoading = true;
     });

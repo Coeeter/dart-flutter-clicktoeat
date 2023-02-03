@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:clicktoeat/domain/comment/comment.dart';
 import 'package:clicktoeat/domain/user/user.dart';
 import 'package:clicktoeat/providers/auth_provider.dart';
@@ -12,7 +10,6 @@ import 'package:clicktoeat/ui/screens/profile/profile_picture_picker.dart';
 import 'package:clicktoeat/ui/screens/profile/update_profile_screen.dart';
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -28,8 +25,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final bool _isUpdatingImage = false;
-
   @override
   Widget build(BuildContext context) {
     var authProvider = Provider.of<AuthProvider>(context);
