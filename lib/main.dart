@@ -46,17 +46,25 @@ void main() async {
   var branchRepo = BranchRepoImpl(
     remoteBranchDao: RemoteBranchDaoImpl(),
   );
-  late AuthProvider authProvider;
+  late UserProvider userProvider;
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
           create: (context) {
-            authProvider = AuthProvider(
-              context,
+            userProvider = UserProvider(
               userRepo,
             );
-            return authProvider;
+            return userProvider;
+          },
+        ),
+        ChangeNotifierProvider(
+          create: (context) {
+            return AuthProvider(
+              context,
+              userRepo,
+              userProvider,
+            );
           },
         ),
         ChangeNotifierProvider(
@@ -73,12 +81,6 @@ void main() async {
             commentRepo,
           ),
         ),
-        ChangeNotifierProvider(
-          create: (context) => UserProvider(
-            authProvider,
-            userRepo,
-          ),
-        )
       ],
       child: const CltApp(),
     ),

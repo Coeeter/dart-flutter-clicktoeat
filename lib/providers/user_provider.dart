@@ -5,10 +5,9 @@ import 'package:flutter/cupertino.dart';
 
 class UserProvider extends ChangeNotifier {
   List<User> users = [];
-  final AuthProvider _authProvider;
   final UserRepo _userRepo;
 
-  UserProvider(this._authProvider, this._userRepo) {
+  UserProvider(this._userRepo) {
     (() async {
       await getUsers();
     })();
