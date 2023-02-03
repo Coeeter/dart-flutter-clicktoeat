@@ -35,6 +35,8 @@ class RestaurantDetailsScreen extends StatefulWidget {
 }
 
 class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
+  String? _selectedBranchId;
+
   @override
   Widget build(BuildContext context) {
     var restaurantProvider = Provider.of<RestaurantProvider>(context);
@@ -93,14 +95,6 @@ class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
                       style: const TextStyle(fontSize: 18),
                     ),
                     const SizedBox(height: 10),
-                    const CltHeading(
-                      text: "Branches",
-                      textStyle: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
                     _buildMap(transformedRestaurant),
                     const SizedBox(height: 10),
                     Row(
@@ -332,41 +326,170 @@ class _RestaurantDetailsScreenState extends State<RestaurantDetailsScreen> {
     );
   }
 
-  AspectRatio _buildMap(TransformedRestaurant transformedRestaurant) {
+  Widget _buildMap(TransformedRestaurant transformedRestaurant) {
     var initialCameraPosition = const CameraPosition(
       target: LatLng(1.3610, 103.8200),
       zoom: 10.25,
     );
-    return AspectRatio(
-      aspectRatio: 1,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: mediumOrange,
-            width: 2,
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const CltHeading(
+              text: "Branches",
+              textStyle: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (_selectedBranchId != null)
+              _buildBranchBtns(transformedRestaurant)
+          ],
+        ),
+        const SizedBox(height: 5),
+        AspectRatio(
+          aspectRatio: 1,
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: mediumOrange,
+                width: 2,
+              ),
+            ),
+            child: GoogleMap(
+              gestureRecognizers: {
+                Factory<OneSequenceGestureRecognizer>(() {
+                  return EagerGestureRecognizer();
+                }),
+              },
+              initialCameraPosition: initialCameraPosition,
+              markers: transformedRestaurant.restaurant.branches.map(
+                (e) {
+                  return Marker(
+                    markerId: MarkerId(e.id),
+                    position: LatLng(e.latitude, e.longitude),
+                    infoWindow: InfoWindow(
+                      title: e.restaurant.name,
+                      snippet: e.address,
+                      onTap: () {
+                        setState(() {
+                          _selectedBranchId = e.id;
+                        });
+                      },
+                    ),
+                  );
+                },
+              ).toSet(),
+              onTap: (_) {
+                setState(() {
+                  _selectedBranchId = null;
+                });
+              },
+            ),
           ),
         ),
-        child: GoogleMap(
-          gestureRecognizers: {
-            Factory<OneSequenceGestureRecognizer>(() {
-              return EagerGestureRecognizer();
-            }),
+      ],
+    );
+  }
+
+  Row _buildBranchBtns(TransformedRestaurant transformedRestaurant) {
+    return Row(
+      children: [
+        IconButton(
+          onPressed: () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => AddBranchScreen(
+                  restaurantId: widget.restaurantId,
+                  navigateBack: Navigator.of(context).pop,
+                  branch: transformedRestaurant.restaurant.branches.firstWhere(
+                    (branch) {
+                      return branch.id == _selectedBranchId;
+                    },
+                  ),
+                ),
+              ),
+            );
+            setState(() {
+              _selectedBranchId = null;
+            });
           },
-          initialCameraPosition: initialCameraPosition,
-          markers: transformedRestaurant.restaurant.branches.map(
-            (e) {
-              return Marker(
-                markerId: MarkerId(e.id),
-                position: LatLng(e.latitude, e.longitude),
-                infoWindow: InfoWindow(
-                  title: e.restaurant.name,
-                  snippet: e.address,
+          splashRadius: 20,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          icon: ShaderMask(
+            blendMode: BlendMode.srcIn,
+            shaderCallback: (rect) {
+              return const LinearGradient(
+                colors: [lightOrange, mediumOrange],
+              ).createShader(rect);
+            },
+            child: const Icon(Icons.edit_location_alt),
+          ),
+        ),
+        if (transformedRestaurant.restaurant.branches.length > 1) ...[
+          const SizedBox(width: 10),
+          IconButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (_) => AlertDialog(
+                  title: const Text("Delete Branch"),
+                  content: const Text(
+                    "Are you sure you want to delete this branch?",
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text("Cancel"),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        var restaurantProvider =
+                            Provider.of<RestaurantProvider>(
+                          context,
+                          listen: false,
+                        );
+                        var authProvider = Provider.of<AuthProvider>(
+                          context,
+                          listen: false,
+                        );
+                        await restaurantProvider.deleteBranchFromRestaurant(
+                          authProvider.token!,
+                          _selectedBranchId!,
+                          widget.restaurantId,
+                        );
+                        setState(() {
+                          _selectedBranchId = null;
+                        });
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text("Delete"),
+                    ),
+                  ],
                 ),
               );
             },
-          ).toSet(),
-        ),
-      ),
+            splashRadius: 20,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            icon: ShaderMask(
+              blendMode: BlendMode.srcIn,
+              shaderCallback: (rect) {
+                return const LinearGradient(
+                  colors: [lightOrange, mediumOrange],
+                ).createShader(rect);
+              },
+              child: const Icon(Icons.delete),
+            ),
+          )
+        ]
+      ],
     );
   }
 

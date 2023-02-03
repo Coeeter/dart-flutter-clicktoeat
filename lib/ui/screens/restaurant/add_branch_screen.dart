@@ -1,4 +1,5 @@
 import 'package:clicktoeat/data/exceptions/default_exception.dart';
+import 'package:clicktoeat/domain/branch/branch.dart';
 import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:clicktoeat/providers/restaurant_provider.dart';
 import 'package:clicktoeat/ui/components/buttons/clt_gradient_button.dart';
@@ -11,11 +12,13 @@ import 'package:provider/provider.dart';
 class AddBranchScreen extends StatefulWidget {
   final String restaurantId;
   final void Function() navigateBack;
+  final Branch? branch;
 
   const AddBranchScreen({
     Key? key,
     required this.restaurantId,
     required this.navigateBack,
+    this.branch,
   }) : super(key: key);
 
   @override
@@ -63,6 +66,13 @@ class _AddBranchScreenState extends State<AddBranchScreen> {
         _latLng!.latitude,
         _latLng!.longitude,
       );
+      if (widget.branch != null) {
+        await restaurantProvider.deleteBranchFromRestaurant(
+          authProvider.token!,
+          widget.branch!.id,
+          widget.restaurantId,
+        );
+      }
     } on DefaultException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.error)),
@@ -72,6 +82,20 @@ class _AddBranchScreenState extends State<AddBranchScreen> {
       });
     }
     widget.navigateBack();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.branch != null) {
+      setState(() {
+        _latLng = LatLng(
+          widget.branch!.latitude,
+          widget.branch!.longitude,
+        );
+        _address = widget.branch!.address;
+      });
+    }
   }
 
   @override
@@ -88,7 +112,7 @@ class _AddBranchScreenState extends State<AddBranchScreen> {
           splashRadius: 20,
           icon: const Icon(Icons.arrow_back),
         ),
-        title: const Text("Add a Branch"),
+        title: Text(widget.branch == null ? "Add a Branch" : "Edit Branch"),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -105,6 +129,7 @@ class _AddBranchScreenState extends State<AddBranchScreen> {
                   child: Column(
                     children: [
                       TextFormField(
+                        initialValue: widget.branch?.address,
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           label: Text("Address"),

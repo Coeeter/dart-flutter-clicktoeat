@@ -228,4 +228,22 @@ class RestaurantProvider extends ChangeNotifier {
     }).toList();
     notifyListeners();
   }
+
+  Future<void> deleteBranchFromRestaurant(
+    String token,
+    String branchId,
+    String restaurantId,
+  ) async {
+    await _branchRepo.deleteBranch(
+      token: token,
+      branchId: branchId,
+      restaurantId: restaurantId,
+    );
+    restaurantList = restaurantList.map((e) {
+      if (e.restaurant.id != restaurantId) return e;
+      e.restaurant.branches.removeWhere((element) => element.id == branchId);
+      return e;
+    }).toList();
+    notifyListeners();
+  }
 }
