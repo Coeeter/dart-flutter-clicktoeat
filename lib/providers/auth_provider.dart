@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:clicktoeat/data/exceptions/unauthenticated_exception.dart';
 import 'package:clicktoeat/domain/user/user.dart';
 import 'package:clicktoeat/domain/user/user_repo.dart';
@@ -62,7 +64,11 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateAccountInfo(String username, String email) async {
+  Future<void> updateAccountInfo({
+    String? username,
+    String? email,
+    File? image,
+  }) async {
     if (token == null) {
       throw UnauthenticatedException();
     }
@@ -70,6 +76,7 @@ class AuthProvider extends ChangeNotifier {
       token: token!,
       username: username,
       email: email,
+      image: image,
     );
     await _userRepo.saveToken(token: updatedToken);
     token = updatedToken;

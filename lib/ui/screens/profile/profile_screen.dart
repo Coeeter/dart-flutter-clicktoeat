@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:clicktoeat/domain/comment/comment.dart';
 import 'package:clicktoeat/domain/user/user.dart';
 import 'package:clicktoeat/providers/auth_provider.dart';
@@ -6,11 +8,13 @@ import 'package:clicktoeat/providers/restaurant_provider.dart';
 import 'package:clicktoeat/ui/components/clt_restaurant_card.dart';
 import 'package:clicktoeat/ui/components/comments/clt_comment_card.dart';
 import 'package:clicktoeat/ui/components/typography/clt_heading.dart';
+import 'package:clicktoeat/ui/screens/profile/update_profile_screen.dart';
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   final User user;
 
   const ProfileScreen({
@@ -19,19 +23,26 @@ class ProfileScreen extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  bool _isUpdatingImage = false;
+
+  @override
   Widget build(BuildContext context) {
     var authProvider = Provider.of<AuthProvider>(context);
     var restaurantsProvider = Provider.of<RestaurantProvider>(context);
     var commentsProvider = Provider.of<CommentProvider>(context);
     var currentUser = authProvider.user;
     var commentsOfUser = commentsProvider.commentList
-        .where((comment) => comment.user.id == user.id)
+        .where((comment) => comment.user.id == widget.user.id)
         .toList();
     var favoriteRestaurantsOfUser = restaurantsProvider.restaurantList
         .where(
           (restaurant) => restaurant.usersWhoFavRestaurant
               .map((e) => e.id)
-              .contains(user.id),
+              .contains(widget.user.id),
         )
         .toList();
     var chunkedFavoriteRestaurants = <List<TransformedRestaurant>>[];
@@ -91,50 +102,29 @@ class ProfileScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Expanded(
-                    child: CltRestaurantCard(
-                      transformedRestaurant: restaurantRow[0],
-                      commentsOfRestaurant: commentsProvider.commentList
-                          .where(
-                            (element) =>
-                                element.restaurant.id ==
-                                restaurantRow[0].restaurant.id,
-                          )
-                          .toList(),
-                      currentUser: currentUser,
-                      toggleFavorite: (shouldFavorite, restaurantId) {
-                        restaurantsProvider.toggleRestaurantFavorite(
-                          authProvider.token!,
-                          restaurantId,
-                          currentUser!,
-                          shouldFavorite,
-                        );
-                      },
+                  ...restaurantRow.map(
+                    (r) => Expanded(
+                      child: CltRestaurantCard(
+                        transformedRestaurant: r,
+                        commentsOfRestaurant: commentsProvider.commentList
+                            .where(
+                              (element) =>
+                                  element.restaurant.id == r.restaurant.id,
+                            )
+                            .toList(),
+                        currentUser: currentUser,
+                        toggleFavorite: (shouldFavorite, restaurantId) {
+                          restaurantsProvider.toggleRestaurantFavorite(
+                            authProvider.token!,
+                            restaurantId,
+                            currentUser!,
+                            shouldFavorite,
+                          );
+                        },
+                      ),
                     ),
                   ),
-                  Expanded(
-                    child: restaurantRow.length == 1
-                        ? Container()
-                        : CltRestaurantCard(
-                            transformedRestaurant: restaurantRow[1],
-                            commentsOfRestaurant: commentsProvider.commentList
-                                .where(
-                                  (element) =>
-                                      element.restaurant.id ==
-                                      restaurantRow[1].restaurant.id,
-                                )
-                                .toList(),
-                            currentUser: currentUser,
-                            toggleFavorite: (shouldFavorite, restaurantId) {
-                              restaurantsProvider.toggleRestaurantFavorite(
-                                authProvider.token!,
-                                restaurantId,
-                                currentUser!,
-                                shouldFavorite,
-                              );
-                            },
-                          ),
-                  ),
+                  if (restaurantRow.length == 1) Expanded(child: Container())
                 ],
               ),
               const SizedBox(height: 10),
@@ -285,16 +275,20 @@ class ProfileScreen extends StatelessWidget {
       floating: false,
       pinned: true,
       actions: [
-        if (currentUser != null && currentUser.id == user.id)
+        if (currentUser != null && currentUser.id == widget.user.id)
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () {}, // TODO: Navigate to edit profile screen
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const UpdateProfileScreen(),
+              ),
+            ),
           ),
       ],
       flexibleSpace: FlexibleSpaceBar(
         centerTitle: true,
         title: Text(
-          user.username,
+          widget.user.username,
           style: const TextStyle(
             color: Colors.white,
             fontSize: 18.0,
@@ -315,20 +309,29 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   shape: BoxShape.circle,
                 ),
-                child: user.image == null
-                    ? const Icon(
-                        Icons.person,
-                        color: Colors.white,
-                        size: 100,
-                      )
-                    : ClipOval(
-                        child: Image.network(
-                          user.image!.url,
-                          fit: BoxFit.cover,
+                child: _isUpdatingImage
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? lightOrange
+                              : Colors.white,
                         ),
-                      ),
+                      )
+                    : widget.user.image == null
+                        ? const Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 100,
+                          )
+                        : ClipOval(
+                            child: Image.network(
+                              widget.user.image!.url,
+                              fit: BoxFit.cover,
+                              loadingBuilder: _loadingBuilder,
+                            ),
+                          ),
               ),
-              if (currentUser != null && currentUser.id == user.id)
+              if (currentUser != null && currentUser.id == widget.user.id)
                 Positioned(
                   bottom: 5,
                   right: 5,
@@ -346,7 +349,26 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     clipBehavior: Clip.hardEdge,
                     child: InkWell(
-                      onTap: () {}, // TODO: Update profile picture
+                      onTap: () async {
+                        var picker = ImagePicker();
+                        var image = await picker.pickImage(
+                          source: ImageSource.gallery,
+                        );
+                        if (image == null) return;
+                        setState(() {
+                          _isUpdatingImage = true;
+                        });
+                        var file = File(image.path);
+                        await Provider.of<AuthProvider>(
+                          context,
+                          listen: false,
+                        ).updateAccountInfo(
+                          image: file,
+                        );
+                        setState(() {
+                          _isUpdatingImage = false;
+                        });
+                      },
                       child: Container(
                         padding: const EdgeInsets.all(3),
                         child: ShaderMask(
@@ -370,6 +392,22 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _loadingBuilder(context, child, loadingProgress) {
+    if (loadingProgress == null) return child;
+    if (loadingProgress.expectedTotalBytes != null) {
+      return CircularProgressIndicator(
+        value: loadingProgress.cumulativeBytesLoaded /
+            loadingProgress.expectedTotalBytes!,
+        color: lightOrange,
+      );
+    }
+    return CircularProgressIndicator(
+      color: Theme.of(context).brightness == Brightness.dark
+          ? lightOrange
+          : Colors.white,
     );
   }
 }
