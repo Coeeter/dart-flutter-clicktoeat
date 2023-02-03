@@ -68,60 +68,61 @@ class _ProfilePicturePickerState extends State<ProfilePicturePicker> {
           Positioned(
             bottom: 5,
             right: 5,
-            child: Material(
-              elevation: 4,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? ElevationOverlay.colorWithOverlay(
-                      Theme.of(context).colorScheme.surface,
-                      Colors.white,
-                      50,
-                    )
-                  : Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-              clipBehavior: Clip.hardEdge,
-              child: InkWell(
-                onTap: () async {
-                  var picker = ImagePicker();
-                  var image = await picker.pickImage(
-                    source: ImageSource.gallery,
-                  );
-                  if (image == null) return;
-                  setState(() {
-                    _isUpdatingImage = true;
-                  });
-                  var file = File(image.path);
-                  await Provider.of<AuthProvider>(
-                    context,
-                    listen: false,
-                  ).updateAccountInfo(
-                    image: file,
-                  );
-                  setState(() {
-                    _isUpdatingImage = false;
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(3),
-                  child: ShaderMask(
-                    blendMode: BlendMode.srcIn,
-                    shaderCallback: (rect) {
-                      return const LinearGradient(
-                        colors: [lightOrange, mediumOrange],
-                      ).createShader(
-                        Rect.fromLTWH(0, 0, rect.width, rect.height),
-                      );
-                    },
-                    child: const Icon(
-                      Icons.camera_alt,
-                    ),
-                  ),
+            child: PopupMenuButton(
+              child: _buildBtn(context),
+              itemBuilder: (_) => [
+                const PopupMenuItem(
+                  child: Text('Upload a photo'),
+                  value: 'upload',
                 ),
-              ),
+                PopupMenuItem(
+                  enabled: currentUser.image != null,
+                  child: const Text('Remove photo'),
+                  value: 'remove',
+                ),
+              ],
+              onSelected: (value) {
+                if (value == 'remove') {
+                  return _removePhoto();
+                }
+                _uploadImage();
+              },
             ),
           )
       ],
+    );
+  }
+
+  Material _buildBtn(BuildContext context) {
+    return Material(
+      elevation: 4,
+      color: Theme.of(context).brightness == Brightness.dark
+          ? ElevationOverlay.colorWithOverlay(
+              Theme.of(context).colorScheme.surface,
+              Colors.white,
+              50,
+            )
+          : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(5),
+      ),
+      clipBehavior: Clip.hardEdge,
+      child: Container(
+        padding: const EdgeInsets.all(3),
+        child: ShaderMask(
+          blendMode: BlendMode.srcIn,
+          shaderCallback: (rect) {
+            return const LinearGradient(
+              colors: [lightOrange, mediumOrange],
+            ).createShader(
+              Rect.fromLTWH(0, 0, rect.width, rect.height),
+            );
+          },
+          child: const Icon(
+            Icons.camera_alt,
+          ),
+        ),
+      ),
     );
   }
 
@@ -139,5 +140,41 @@ class _ProfilePicturePickerState extends State<ProfilePicturePicker> {
           ? lightOrange
           : Colors.white,
     );
+  }
+
+  void _uploadImage() async {
+    var picker = ImagePicker();
+    var image = await picker.pickImage(
+      source: ImageSource.gallery,
+    );
+    if (image == null) return;
+    setState(() {
+      _isUpdatingImage = true;
+    });
+    var file = File(image.path);
+    await Provider.of<AuthProvider>(
+      context,
+      listen: false,
+    ).updateAccountInfo(
+      image: file,
+    );
+    setState(() {
+      _isUpdatingImage = false;
+    });
+  }
+
+  void _removePhoto() async {
+    setState(() {
+      _isUpdatingImage = true;
+    });
+    await Provider.of<AuthProvider>(
+      context,
+      listen: false,
+    ).updateAccountInfo(
+      deleteImage: true,
+    );
+    setState(() {
+      _isUpdatingImage = false;
+    });
   }
 }

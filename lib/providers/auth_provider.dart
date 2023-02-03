@@ -68,6 +68,7 @@ class AuthProvider extends ChangeNotifier {
     String? username,
     String? email,
     File? image,
+    bool? deleteImage,
   }) async {
     if (token == null) {
       throw UnauthenticatedException();
@@ -77,6 +78,7 @@ class AuthProvider extends ChangeNotifier {
       username: username,
       email: email,
       image: image,
+      deleteImage: deleteImage,
     );
     await _userRepo.saveToken(token: updatedToken);
     token = updatedToken;
