@@ -116,6 +116,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                   border: const OutlineInputBorder(),
                   errorText: nameError,
                 ),
+                textInputAction: TextInputAction.next,
                 validator: (value) {
                   if (value!.isEmpty) {
                     return 'Username required';

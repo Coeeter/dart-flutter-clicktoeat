@@ -322,6 +322,7 @@ class _SignUpSecondStageState extends State<SignUpSecondStage> {
                   label: const Text("Password"),
                   border: const OutlineInputBorder(),
                   errorText: widget.passwordError,
+                  errorMaxLines: 3,
                   suffixIcon: IconButton(
                     icon: _passwordObscureText
                         ? const Icon(Icons.visibility)
