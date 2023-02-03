@@ -1,9 +1,12 @@
 import 'package:animations/animations.dart';
+import 'package:clicktoeat/domain/user/user.dart';
+import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:clicktoeat/ui/screens/profile/profile_screen.dart';
 import 'package:clicktoeat/ui/screens/restaurant/home_screen.dart';
 import 'package:clicktoeat/ui/screens/search/search_screen.dart';
 import 'package:clicktoeat/ui/theme/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -15,27 +18,32 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   var currentIndex = 0;
   var reverse = false;
-  var screens = [
-    const HomeScreen(),
-    const SearchScreen(),
-    const ProfileScreen(),
-  ];
 
   @override
   Widget build(BuildContext context) {
+    var authProvider = Provider.of<AuthProvider>(context);
+    var currentUser = authProvider.user!;
+    var screens = [
+      const HomeScreen(),
+      const SearchScreen(),
+      ProfileScreen(user: currentUser),
+    ];
+
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.search),
             label: 'Search',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: currentUser.image == null
+                ? const Icon(Icons.person)
+                : _buildUserProfilePicIcon(currentUser),
             label: 'Profile',
           ),
         ],
@@ -63,6 +71,32 @@ class _MainScreenState extends State<MainScreen> {
           );
         },
         child: screens[currentIndex],
+      ),
+    );
+  }
+
+  Container _buildUserProfilePicIcon(User currentUser) {
+    return Container(
+      width: 30,
+      height: 30,
+      clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: currentIndex == 2
+            ? Border.all(
+                color: mediumOrange,
+                width: 2,
+              )
+            : null,
+      ),
+      child: ClipOval(
+        child: Opacity(
+          opacity: currentIndex == 2 ? 1 : 0.5,
+          child: Image.network(
+            currentUser.image!.url,
+            fit: BoxFit.cover,
+          ),
+        ),
       ),
     );
   }

@@ -54,7 +54,7 @@ class CltCommentCard extends StatelessWidget {
                   InkWell(
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => ProfileScreen(userId: comment.user.id),
+                        builder: (_) => ProfileScreen(user: comment.user),
                       ),
                     ),
                     splashFactory: InkRipple.splashFactory,

@@ -182,7 +182,7 @@ class _SearchScreenState extends State<SearchScreen> {
             transitionType: ContainerTransitionType.fadeThrough,
             openBuilder: (context, _) {
               return ProfileScreen(
-                userId: e.id,
+                user: e,
               );
             },
           ),
