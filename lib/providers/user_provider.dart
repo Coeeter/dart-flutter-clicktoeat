@@ -1,6 +1,5 @@
 import 'package:clicktoeat/domain/user/user.dart';
 import 'package:clicktoeat/domain/user/user_repo.dart';
-import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:flutter/cupertino.dart';
 
 class UserProvider extends ChangeNotifier {

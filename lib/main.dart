@@ -46,26 +46,18 @@ void main() async {
   var branchRepo = BranchRepoImpl(
     remoteBranchDao: RemoteBranchDaoImpl(),
   );
-  late UserProvider userProvider;
+  UserProvider userProvider = UserProvider(userRepo);
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (context) {
-            userProvider = UserProvider(
-              userRepo,
-            );
-            return userProvider;
-          },
+          create: (context) => userProvider,
         ),
         ChangeNotifierProvider(
-          create: (context) {
-            return AuthProvider(
-              context,
-              userRepo,
-              userProvider,
-            );
-          },
+          create: (context) => AuthProvider(
+            userRepo,
+            userProvider,
+          ),
         ),
         ChangeNotifierProvider(
           create: (context) => RestaurantProvider(

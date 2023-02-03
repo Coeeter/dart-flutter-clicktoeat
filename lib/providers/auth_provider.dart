@@ -5,13 +5,12 @@ import 'package:clicktoeat/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final BuildContext _context;
   final UserRepo _userRepo;
   final UserProvider _userProvider;
   String? token;
   User? user;
 
-  AuthProvider(this._context, this._userRepo, this._userProvider) {
+  AuthProvider(this._userRepo, this._userProvider) {
     (() async {
       try {
         await getToken();
@@ -29,12 +28,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> getCurrentUser() async {
     if (token == null) {
-      ScaffoldMessenger.of(_context).showSnackBar(
-        const SnackBar(
-          content: Text("Must be logged in to do this action!"),
-        ),
-      );
-      return;
+      throw UnauthenticatedException();
     }
     user = await _userRepo.getUserByToken(token: token!);
     notifyListeners();
@@ -70,12 +64,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> updateAccountInfo(String username, String email) async {
     if (token == null) {
-      ScaffoldMessenger.of(_context).showSnackBar(
-        const SnackBar(
-          content: Text("Must be logged in to do this action!"),
-        ),
-      );
-      return;
+      throw UnauthenticatedException();
     }
     var updatedToken = await _userRepo.updateAccount(
       token: token!,
@@ -96,12 +85,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> updatePassword(String password) async {
     if (token == null) {
-      ScaffoldMessenger.of(_context).showSnackBar(
-        const SnackBar(
-          content: Text("Must be logged in to do this action!"),
-        ),
-      );
-      return;
+      throw UnauthenticatedException();
     }
     var updatedToken = await _userRepo.updateAccount(
       token: token!,
@@ -114,19 +98,16 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> deleteAccount(String password) async {
     if (token == null) {
-      ScaffoldMessenger.of(_context).showSnackBar(
-        const SnackBar(
-          content: Text("Must be logged in to do this action!"),
-        ),
-      );
-      return;
+      throw UnauthenticatedException();
     }
     await _userRepo.deleteAccount(
       token: token!,
       password: password,
     );
     await logOut();
-    _userProvider.users = _userProvider.users.where((e) => e.id != user!.id).toList();
+    _userProvider.users = _userProvider.users.where((e) {
+      return e.id != user!.id;
+    }).toList();
     _userProvider.notifyListeners();
   }
 }
