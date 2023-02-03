@@ -22,11 +22,11 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     var authProvider = Provider.of<AuthProvider>(context);
-    var currentUser = authProvider.user!;
+    var currentUser = authProvider.user;
     var screens = [
       const HomeScreen(),
       const SearchScreen(),
-      ProfileScreen(user: currentUser),
+      currentUser != null ? ProfileScreen(user: currentUser) : Container(),
     ];
 
     return Scaffold(
@@ -41,9 +41,9 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Search',
           ),
           BottomNavigationBarItem(
-            icon: currentUser.image == null
+            icon: currentUser?.image == null
                 ? const Icon(Icons.person)
-                : _buildUserProfilePicIcon(currentUser),
+                : _buildUserProfilePicIcon(currentUser!),
             label: 'Profile',
           ),
         ],
@@ -75,29 +75,37 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Container _buildUserProfilePicIcon(User currentUser) {
-    return Container(
-      width: 30,
-      height: 30,
-      clipBehavior: Clip.hardEdge,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: currentIndex == 2
-            ? Border.all(
-                color: mediumOrange,
-                width: 2,
-              )
-            : null,
-      ),
-      child: ClipOval(
-        child: Opacity(
-          opacity: currentIndex == 2 ? 1 : 0.5,
-          child: Image.network(
-            currentUser.image!.url,
-            fit: BoxFit.cover,
+  Widget _buildUserProfilePicIcon(User currentUser) {
+    return Stack(
+      children: [
+        Container(
+          width: 30,
+          height: 30,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.all(5),
+          child: const CircularProgressIndicator(),
+        ),
+        Container(
+          width: 30,
+          height: 30,
+          clipBehavior: Clip.hardEdge,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: currentIndex == 2
+                ? Border.all(
+                    color: mediumOrange,
+                    width: 2,
+                  )
+                : null,
+          ),
+          child: ClipOval(
+            child: Image.network(
+              currentUser.image!.url,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
