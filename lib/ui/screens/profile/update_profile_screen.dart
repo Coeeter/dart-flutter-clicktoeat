@@ -107,10 +107,10 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
           key: _formKey,
           child: Column(
             children: [
-              ProfilePicturePicker(user: currentUser!),
+              if (currentUser != null) ProfilePicturePicker(user: currentUser),
               const SizedBox(height: 16),
               TextFormField(
-                initialValue: currentUser.username,
+                initialValue: currentUser?.username ?? "",
                 decoration: InputDecoration(
                   labelText: 'Username',
                   border: const OutlineInputBorder(),
@@ -137,7 +137,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                initialValue: currentUser.email,
+                initialValue: currentUser?.email ?? "",
                 decoration: const InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(),

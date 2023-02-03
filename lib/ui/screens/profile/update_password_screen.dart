@@ -117,6 +117,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
             child: Column(
               children: [
                 ShaderMask(
+                  blendMode: BlendMode.srcIn,
                   shaderCallback: (bounds) => const LinearGradient(
                     colors: [lightOrange, mediumOrange],
                   ).createShader(bounds),
@@ -135,6 +136,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                       icon: _obscureTextOld
                           ? const Icon(Icons.visibility_off)
                           : const Icon(Icons.visibility),
+                      splashRadius: 20,
                       onPressed: () {
                         setState(() {
                           _obscureTextOld = !_obscureTextOld;
@@ -170,6 +172,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                       icon: _obscureTextNew
                           ? const Icon(Icons.visibility_off)
                           : const Icon(Icons.visibility),
+                      splashRadius: 20,
                       onPressed: () {
                         setState(() {
                           _obscureTextNew = !_obscureTextNew;

@@ -113,10 +113,10 @@ class AuthProvider extends ChangeNotifier {
       token: token!,
       password: password,
     );
-    await logOut();
     _userProvider.users = _userProvider.users.where((e) {
       return e.id != user!.id;
     }).toList();
     _userProvider.notifyListeners();
+    await logOut();
   }
 }

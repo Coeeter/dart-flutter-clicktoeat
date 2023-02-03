@@ -20,7 +20,7 @@ class CltGradientButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var disabledColor = Theme.of(context).brightness == Brightness.dark
-        ? Colors.grey[800]
+        ? Colors.grey[700]
         : Colors.grey[300];
 
     return InkWell(
