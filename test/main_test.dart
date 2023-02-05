@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:clicktoeat/ui/screens/auth/auth_screen.dart';
+import 'package:clicktoeat/ui/screens/search/search_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -61,6 +64,54 @@ void main() {
         );
         await tester.tap(find.byKey(const ValueKey("login-button")));
         expect(widget.userRepo.token != oldToken, true);
+      },
+    );
+  });
+
+  group('Search Screen Test', () {
+    setUpAll(() => HttpOverrides.global = null);
+
+    testWidgets(
+      'When search, should only show cards containing the text',
+      (widgetTester) async {
+        await HttpOverrides.runZoned(
+          () async {
+            await widgetTester.pumpFrames(
+              FakeProvider(child: const SearchScreen()),
+              const Duration(seconds: 1),
+            );
+            await widgetTester.enterText(
+              find.byKey(const ValueKey('search-input')),
+              "9",
+            );
+            await widgetTester.pump(const Duration(seconds: 1));
+            expect(find.byKey(const ValueKey('search-card')), findsNWidgets(2));
+          },
+        );
+        await widgetTester.pumpAndSettle();
+      },
+    );
+
+    testWidgets(
+      'When search with invalid query, should show no cards at all',
+      (widgetTester) async {
+        await HttpOverrides.runZoned(
+          () async {
+            await widgetTester.pumpFrames(
+              FakeProvider(child: const SearchScreen()),
+              const Duration(seconds: 1),
+            );
+            await widgetTester.enterText(
+              find.byKey(const ValueKey('search-input')),
+              "fasdfadfadf",
+            );
+            await widgetTester.pump(const Duration(seconds: 1));
+            expect(find.byKey(const ValueKey('search-card')), findsNothing);
+            expect(find.text("No users found"), findsOneWidget);
+            expect(find.text("No restaurants found"), findsOneWidget);
+          },
+        );
+        await widgetTester.pumpAndSettle();
       },
     );
   });

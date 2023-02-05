@@ -25,9 +25,6 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     var restaurantProvider = Provider.of<RestaurantProvider>(context);
     var userProvider = Provider.of<UserProvider>(context);
-    var authProvider = Provider.of<AuthProvider>(context);
-    var currentUser = authProvider.user!;
-    var token = authProvider.token!;
     var restaurantList = restaurantProvider.restaurantList
         .where(
           (element) => element.restaurant.name
@@ -67,7 +64,7 @@ class _SearchScreenState extends State<SearchScreen> {
             child: Form(
               key: _formKey,
               child: TextFormField(
-                key: const ValueKey('search'),
+                key: const ValueKey('search-input'),
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: IconButton(
@@ -104,9 +101,7 @@ class _SearchScreenState extends State<SearchScreen> {
               const SizedBox(height: 10),
               _buildRestaurantCards(
                 restaurantList,
-                currentUser,
                 restaurantProvider,
-                token,
               ),
               if (restaurantList.isEmpty)
                 Material(
@@ -194,67 +189,72 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _buildRestaurantCards(
     List<TransformedRestaurant> restaurantList,
-    User currentUser,
     RestaurantProvider restaurantProvider,
-    String token,
   ) {
-    return Column(
-      children: restaurantList.map(
-        (e) {
-          var isFavoritedByCurrentUser = e.usersWhoFavRestaurant.any(
-            (element) => element.id == currentUser.id,
-          );
+    return Consumer<AuthProvider>(
+      builder: (context, provider, child) {
+        var currentUser = provider.user;
+        var token = provider.token;
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: OpenContainer(
-              closedBuilder: (context, openContainer) {
-                return _buildSearchCard(
-                  leadingImageUrl: e.restaurant.image!.url,
-                  title: e.restaurant.name,
-                  onTap: openContainer,
-                  trailing: ShaderMask(
-                    blendMode: BlendMode.srcIn,
-                    shaderCallback: (bounds) => const LinearGradient(
-                      colors: [lightOrange, mediumOrange],
-                    ).createShader(bounds),
-                    child: IconButton(
-                      splashRadius: 20,
-                      icon: Icon(
-                        isFavoritedByCurrentUser
-                            ? Icons.favorite
-                            : Icons.favorite_border,
+        return Column(
+          children: restaurantList.map(
+            (e) {
+              var isFavoritedByCurrentUser = e.usersWhoFavRestaurant.any(
+                (element) => element.id == currentUser?.id,
+              );
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: OpenContainer(
+                  closedBuilder: (context, openContainer) {
+                    return _buildSearchCard(
+                      leadingImageUrl: e.restaurant.image!.url,
+                      title: e.restaurant.name,
+                      onTap: openContainer,
+                      trailing: ShaderMask(
+                        blendMode: BlendMode.srcIn,
+                        shaderCallback: (bounds) => const LinearGradient(
+                          colors: [lightOrange, mediumOrange],
+                        ).createShader(bounds),
+                        child: IconButton(
+                          splashRadius: 20,
+                          icon: Icon(
+                            isFavoritedByCurrentUser
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                          ),
+                          onPressed: () {
+                            restaurantProvider.toggleRestaurantFavorite(
+                              token!,
+                              e.restaurant.id,
+                              currentUser!,
+                              !isFavoritedByCurrentUser,
+                            );
+                          },
+                        ),
                       ),
-                      onPressed: () {
-                        restaurantProvider.toggleRestaurantFavorite(
-                          token,
-                          e.restaurant.id,
-                          currentUser,
-                          !isFavoritedByCurrentUser,
-                        );
-                      },
-                    ),
+                    );
+                  },
+                  closedColor: ElevationOverlay.colorWithOverlay(
+                    Theme.of(context).colorScheme.surface,
+                    Colors.white,
+                    4,
                   ),
-                );
-              },
-              closedColor: ElevationOverlay.colorWithOverlay(
-                Theme.of(context).colorScheme.surface,
-                Colors.white,
-                4,
-              ),
-              closedElevation: 4,
-              openElevation: 0,
-              transitionDuration: const Duration(milliseconds: 500),
-              transitionType: ContainerTransitionType.fadeThrough,
-              openBuilder: (context, _) {
-                return RestaurantDetailsScreen(
-                  restaurantId: e.restaurant.id,
-                );
-              },
-            ),
-          );
-        },
-      ).toList(),
+                  closedElevation: 4,
+                  openElevation: 0,
+                  transitionDuration: const Duration(milliseconds: 500),
+                  transitionType: ContainerTransitionType.fadeThrough,
+                  openBuilder: (context, _) {
+                    return RestaurantDetailsScreen(
+                      restaurantId: e.restaurant.id,
+                    );
+                  },
+                ),
+              );
+            },
+          ).toList(),
+        );
+      }
     );
   }
 
@@ -268,6 +268,7 @@ class _SearchScreenState extends State<SearchScreen> {
     var endQueryIndex = startQueryIndex + query.length;
 
     return InkWell(
+      key: const ValueKey("search-card"),
       onTap: onTap,
       child: ListTile(
         leading: Container(
