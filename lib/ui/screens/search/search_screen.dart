@@ -67,6 +67,7 @@ class _SearchScreenState extends State<SearchScreen> {
             child: Form(
               key: _formKey,
               child: TextFormField(
+                key: const ValueKey('search'),
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: IconButton(

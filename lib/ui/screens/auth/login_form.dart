@@ -90,6 +90,7 @@ class _LoginFormState extends State<LoginForm> {
               const CltHeading(text: "Login"),
               const SizedBox(height: 25),
               TextFormField(
+                key: const ValueKey('login-email-input'),
                 decoration: InputDecoration(
                   label: const Text("Email"),
                   border: const OutlineInputBorder(),
@@ -119,6 +120,7 @@ class _LoginFormState extends State<LoginForm> {
               ),
               const SizedBox(height: 15),
               TextFormField(
+                key: const ValueKey('login-password-input'),
                 decoration: InputDecoration(
                   label: const Text("Password"),
                   border: const OutlineInputBorder(),
@@ -166,6 +168,7 @@ class _LoginFormState extends State<LoginForm> {
               SizedBox(
                 width: double.infinity,
                 child: CltGradientButton(
+                  key: const ValueKey("login-button"),
                   onClick: login,
                   isLoading: _isLoading,
                   text: "Login",

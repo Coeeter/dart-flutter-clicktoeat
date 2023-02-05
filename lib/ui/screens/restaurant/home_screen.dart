@@ -27,6 +27,7 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        key: const ValueKey('home-app-bar'),
         title: Text(
           currentUser == null
               ? "Loading..."
