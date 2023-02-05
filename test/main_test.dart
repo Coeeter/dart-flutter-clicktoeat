@@ -9,6 +9,8 @@ import 'fake_provider.dart';
 
 void main() {
   group('Auth Screen widget tests', () {
+    setUpAll(() => HttpOverrides.global = null);
+
     testWidgets(
       'When submit empty fields, should show error',
       (tester) async {
@@ -47,7 +49,7 @@ void main() {
     );
 
     testWidgets(
-      'When submit valid fields, should save new token',
+      'When submit valid fields, should save new token and navigate to home screen',
       (tester) async {
         var widget = FakeProvider(child: const AuthScreen());
         await tester.pumpFrames(widget, const Duration(seconds: 1));
@@ -64,6 +66,12 @@ void main() {
         );
         await tester.tap(find.byKey(const ValueKey("login-button")));
         expect(widget.userRepo.token != oldToken, true);
+        await HttpOverrides.runZoned(
+          () async {
+            await tester.pumpFrames(widget, const Duration(seconds: 1));
+            expect(find.text("Welcome, ${lastPerson.username}"), findsOneWidget);
+          },
+        );
       },
     );
   });

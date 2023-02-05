@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:animations/animations.dart';
 import 'package:clicktoeat/providers/auth_provider.dart';
 import 'package:clicktoeat/providers/comment_provider.dart';
@@ -242,14 +244,12 @@ class FeaturedRestaurantSection extends StatelessWidget {
         return averateRatingOfB.compareTo(averateRatingOfA);
       });
 
-    return SizedBox(
-      width: double.infinity,
-      height: 278.4,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          return SizedBox(
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: List.generate(
+          min(5, featuredRestaurants.length),
+          (index) => SizedBox(
             width: MediaQuery.of(context).size.width / 2,
             child: CltRestaurantCard(
               toggleFavorite: (toAddToFav, restaurantId) {
@@ -269,9 +269,8 @@ class FeaturedRestaurantSection extends StatelessWidget {
               ).toList(),
               transformedRestaurant: featuredRestaurants[index],
             ),
-          );
-        },
-        itemCount: 5,
+          ),
+        ),
       ),
     );
   }
@@ -302,40 +301,34 @@ class FavoriteRestaurantsSection extends StatelessWidget {
         .toList()
       ..sort((a, b) => a.restaurant.name.compareTo(b.restaurant.name));
 
-    return SizedBox(
-      width: double.infinity,
-      height: 278.4,
-      child: favoriteRestaurants.isEmpty
-          ? const EmptyFavoritesContent()
-          : ListView.builder(
-              scrollDirection: Axis.horizontal,
-              shrinkWrap: true,
-              itemBuilder: (context, index) {
-                return SizedBox(
-                  width: MediaQuery.of(context).size.width / 2,
-                  child: CltRestaurantCard(
-                    toggleFavorite: (toAddToFav, restaurantId) {
-                      restaurantProvider.toggleRestaurantFavorite(
-                        authProvider.token!,
-                        restaurantId,
-                        currentUser!,
-                        toAddToFav,
-                      );
-                    },
-                    commentsOfRestaurant: commentProvider.commentList
-                        .where(
-                          (element) =>
-                              element.restaurant.id ==
-                              favoriteRestaurants[index].restaurant.id,
-                        )
-                        .toList(),
-                    currentUser: currentUser,
-                    transformedRestaurant: favoriteRestaurants[index],
-                  ),
+    if (favoriteRestaurants.isEmpty) {
+      return const EmptyFavoritesContent();
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: favoriteRestaurants.map((e) {
+          return SizedBox(
+            width: MediaQuery.of(context).size.width / 2,
+            child: CltRestaurantCard(
+              toggleFavorite: (toAddToFav, restaurantId) {
+                restaurantProvider.toggleRestaurantFavorite(
+                  authProvider.token!,
+                  restaurantId,
+                  currentUser!,
+                  toAddToFav,
                 );
               },
-              itemCount: favoriteRestaurants.length,
+              commentsOfRestaurant: commentProvider.commentList
+                  .where((element) => element.restaurant.id == e.restaurant.id)
+                  .toList(),
+              currentUser: currentUser,
+              transformedRestaurant: e,
             ),
+          );
+        }).toList(),
+      ),
     );
   }
 }
