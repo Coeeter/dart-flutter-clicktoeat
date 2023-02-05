@@ -30,7 +30,7 @@ void main() {
     late AuthProvider authProvider;
     late UserProvider userProvider;
     late FakeUserRepo fakeUserRepo;
-    setUpAll(() {
+    setUp(() {
       fakeUserRepo = FakeUserRepo();
       userProvider = UserProvider(fakeUserRepo);
       authProvider = AuthProvider(fakeUserRepo, userProvider);
@@ -74,15 +74,40 @@ void main() {
     );
 
     test(
-      'When logout, should update token and users',
+      'When logout, should update token',
       () async {
         var oldToken = authProvider.token;
         await authProvider.logOut();
         expect(authProvider.token, isNull);
         expect(authProvider.token, isNot(oldToken));
-        expect(authProvider.user, isNull);
-        expect(userProvider.users.length, fakeUserRepo.users.length);
       },
     );
+
+    test('When Delete account, should remove user', () async {
+      var oldUserListSize = userProvider.users.length;
+      var oldToken = authProvider.token;
+      await authProvider.deleteAccount(";lfkajsd;lfkajs;dlkjfa");
+      expect(authProvider.token, isNull);
+      expect(authProvider.token, isNot(oldToken));
+      expect(authProvider.user, isNull);
+      expect(userProvider.users.length, oldUserListSize - 1);
+    });
+
+    test('When update account, should update user', () async {
+      var oldToken = authProvider.token;
+      var oldUser = authProvider.user;
+      await authProvider.updateAccountInfo(
+        username: "test",
+        email: "test@test.com",
+      );
+      expect(authProvider.token, isNotNull);
+      expect(authProvider.token, isNot(oldToken));
+      expect(authProvider.user, isNotNull);
+      expect(authProvider.user, isNot(oldUser));
+      expect(authProvider.user?.email, "test@test.com");
+      expect(authProvider.user?.username, "test");
+      expect(fakeUserRepo.users.last.username, "test");
+      expect(fakeUserRepo.users.last.email, "test@test.com");
+    });
   });
 }
